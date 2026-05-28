@@ -7,7 +7,7 @@ SMTPでPDF添付メールを送る（さくらサーバー対応）
   SMTP_USER     monthly@salagracia.com
   SMTP_PASSWORD （Render環境変数で設定）
   FROM_EMAIL    monthly@salagracia.com
-  FROM_NAME     サラ・グラシアアカデミー
+  FROM_NAME     サラグラシアアカデミー
 """
 import os
 import smtplib
@@ -27,7 +27,7 @@ def send_pdf_email(to_email: str, user_name: str, pdf_path: str) -> dict:
     smtp_user = os.environ.get('SMTP_USER', '')
     smtp_password = os.environ.get('SMTP_PASSWORD', '')
     from_email = os.environ.get('FROM_EMAIL', 'monthly@salagracia.com')
-    from_name = os.environ.get('FROM_NAME', 'サラ・グラシアアカデミー')
+    from_name = os.environ.get('FROM_NAME', 'サラグラシアアカデミー')
     use_ssl = os.environ.get('SMTP_USE_SSL', 'false').lower() == 'true'
 
     if not all([smtp_host, smtp_user, smtp_password]):
@@ -69,7 +69,7 @@ def send_pdf_email(to_email: str, user_name: str, pdf_path: str) -> dict:
 あなたの再起動の旅を、応援しています🌹
 
 山岡サラ
-サラ・グラシアアカデミー
+サラグラシアアカデミー
 https://salagracia.com
 
 ────────────────
