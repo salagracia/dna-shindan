@@ -576,13 +576,13 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     ))
     story.append(Spacer(1, 8*mm))
     story.append(Paragraph(
-        "山岡サラ<br/>サラグラシアアカデミー",
+        "山岡サラ（サラグラシアアカデミー）",
         styles['small']
     ))
 
     story.append(Spacer(1, 8*mm))
     story.append(Paragraph(
-        f"人生開花タイプ診断 v4.0 / 監修：山岡サラ・サラグラシアアカデミー<br/>"
+        f"人生開花タイプ診断 v4.0 / 監修：山岡サラ（サラグラシアアカデミー）<br/>"
         f"発行日：{datetime.now().strftime('%Y年%m月%d日')}",
         styles['small']
     ))

@@ -38,7 +38,7 @@ st.markdown("""
 
 
 st.markdown('<h1 class="main-header">🌹 DNA 診断</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">人生再起動のための、あなた専用の設計図<br>監修：山岡サラ・サラ・グラシアアカデミー</p>',
+st.markdown('<p class="sub-header">人生再起動のための、あなた専用の設計図<br>監修：山岡サラ（サラグラシアアカデミー）</p>',
             unsafe_allow_html=True)
 
 st.markdown("""
@@ -237,7 +237,7 @@ st.divider()
 st.markdown("""
 <div style='text-align:center; color:#888; font-size:0.85em; margin-top:30px;'>
     DNA 診断 v3.2 — 18問拡張版<br>
-    監修：山岡サラ・サラ・グラシアアカデミー<br>
+    監修：山岡サラ（サラグラシアアカデミー）<br>
     『人生は、何度でも再起動できる』
 </div>
 """, unsafe_allow_html=True)
