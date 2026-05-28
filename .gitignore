@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+
+# 仮想環境
+venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 出力ファイル
+output/*.pdf
+!output/.gitkeep
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Skyfield ephemeris (大きいファイル)
+*.bsp
+
+# サラさん専用データ（公開しない）
+resources/dna-shindan-サラ*
+resources/サラのプロフィール*
+
+# 参照資料（著作権配慮）
+templates/*.pdf
+templates/*.docx
+templates/~$*

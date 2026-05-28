@@ -1,0 +1,8 @@
+streamlit
+reportlab
+openpyxl
+pillow
+requests
+pdfplumber
+lunar-python
+skyfield
