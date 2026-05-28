@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from main import run_diagnosis
 from pdf_generator import generate_pdf
 from calculations.personality_quiz import ALL_QUESTIONS, NARRATIVE_QUESTIONS
+from email_sender import send_pdf_email
 
 
 st.set_page_config(
@@ -187,15 +188,33 @@ if st.button("✨ あなたのDNAを診断する ✨", disabled=not input_valid)
                     st.markdown(f"**🌙 次の天中殺：{next_p[0]}年〜{next_p[1]}年**")
 
             st.markdown("---")
-            st.markdown("### 📥 完全版レポートをダウンロード")
+            st.markdown("### 📥 完全版レポートを受け取る")
+
+            # メール送信を優先表示
+            if email:
+                st.markdown(f"**📧 メールでPDFを受け取る（{email}）**")
+                st.caption("登録メールアドレスにPDFを添付してお送りします。")
+                if st.button("✉️ メールで送信する", key="send_email"):
+                    with st.spinner("メール送信中... 📨"):
+                        result = send_pdf_email(email, user_input['name'], pdf_path)
+                        if result['success']:
+                            st.success(f"✅ {result['message']}\n\n📬 メールボックスをご確認ください（迷惑メールフォルダもチェック）")
+                            st.balloons()
+                        else:
+                            st.error(f"❌ メール送信に失敗しました\n{result['message']}")
+                            st.info("以下からPDFを直接ダウンロードできます。")
+
+            # 直接ダウンロードも可
+            st.markdown("**または、PDFを直接ダウンロード**")
             with open(pdf_path, "rb") as f:
                 st.download_button(
-                    label="📄 8ページPDFをダウンロード",
+                    label="📄 PDFをダウンロード",
                     data=f.read(),
                     file_name=f"DNA診断_{user_input['name'].replace(' ', '')}_{datetime.now().strftime('%Y%m%d')}.pdf",
                     mime="application/pdf"
                 )
-            os.unlink(pdf_path)
+            # 一時ファイルはメール送信後も保持（ボタンを2回押せるように）
+            # os.unlink(pdf_path) ← セッション内で消さない
 
         except Exception as e:
             st.error(f"診断中にエラーが発生しました：{e}")
