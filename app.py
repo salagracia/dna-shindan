@@ -18,7 +18,7 @@ from email_sender import send_pdf_email
 
 
 st.set_page_config(
-    page_title="人生開花タイプ診断 - サラ・グラシアアカデミー",
+    page_title="人生開花タイプ診断 - サラグラシアアカデミー",
     page_icon="🌹",
     layout="centered",
     initial_sidebar_state="collapsed"

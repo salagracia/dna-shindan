@@ -68,15 +68,14 @@ def send_pdf_email(to_email: str, user_name: str, pdf_path: str) -> dict:
   <p>あなたの再起動の旅を、応援しています🌹</p>
 
   <p>
-    山岡サラ<br>
-    サラグラシアアカデミー<br>
+    山岡サラ（サラグラシアアカデミー）<br>
     <a href="https://salagracia.com" style="color: #8B4789;">https://salagracia.com</a>
   </p>
 
   <hr style="border: 1px solid #ccc;">
   <p style="color: #888; font-size: 0.85em;">
     ※ このメールは自動送信です<br>
-    ※ DNA診断アプリ：<a href="https://dna-shindan-sara.onrender.com">https://dna-shindan-sara.onrender.com</a>
+    ※ 人生開花タイプ診断：<a href="https://dna-shindan-sara.onrender.com">https://dna-shindan-sara.onrender.com</a>
   </p>
 </div>
 """
