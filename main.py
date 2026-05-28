@@ -1,5 +1,5 @@
 """
-DNA診断v2 メインオーケストレーター（lunar-python + skyfield統合・精度向上版）
+人生開花タイプ診断v2 メインオーケストレーター（lunar-python + skyfield統合・精度向上版）
 """
 from datetime import date, datetime
 import os
@@ -123,7 +123,7 @@ def main():
 
     output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, f"DNA診断_{sara_input['name'].replace(' ', '')}_v4.0_{datetime.now().strftime('%Y%m%d')}.pdf")
+    output_path = os.path.join(output_dir, f"人生開花タイプ診断_{sara_input['name'].replace(' ', '')}_v4.0_{datetime.now().strftime('%Y%m%d')}.pdf")
 
     print(f"\n=== PDF生成中: {output_path} ===")
     generate_pdf(sara_input, result, output_path)

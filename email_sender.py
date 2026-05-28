@@ -41,9 +41,9 @@ def send_pdf_email(to_email: str, user_name: str, pdf_path: str) -> dict:
     # メール本文
     html_body = f"""
 <div style="font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif; max-width: 600px; margin: auto;">
-  <h2 style="color: #8B4789;">🌹 DNA診断レポートが完成しました</h2>
+  <h2 style="color: #8B4789;">🌹 人生開花タイプ診断レポートが完成しました</h2>
   <p>{user_name} さん</p>
-  <p>この度はDNA診断を受けてくださり、本当にありがとうございます。</p>
+  <p>この度は人生開花タイプ診断を受けてくださり、本当にありがとうございます。</p>
   <p>あなたの「<strong>人生再起動のための個人設計図</strong>」が完成しました。</p>
   <p>📎 添付ファイルからPDFをご確認ください。</p>
 
@@ -82,7 +82,7 @@ def send_pdf_email(to_email: str, user_name: str, pdf_path: str) -> dict:
 
     text_body = f"""{user_name} さん
 
-この度はDNA診断を受けてくださり、本当にありがとうございます。
+この度は人生開花タイプ診断を受けてくださり、本当にありがとうございます。
 
 あなたの「人生再起動のための個人設計図」が完成しました。
 📎 添付ファイルからPDFをご確認ください。
@@ -119,7 +119,7 @@ https://salagracia.com
             "text": text_body,
             "attachments": [
                 {
-                    "filename": f"DNA診断_{user_name}.pdf",
+                    "filename": f"人生開花タイプ診断_{user_name}.pdf",
                     "content": pdf_b64,
                 }
             ]

@@ -37,7 +37,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-st.markdown('<h1 class="main-header">🌹 DNA 診断</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">🌹 人生開花タイプ診断</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">人生再起動のための、あなた専用の設計図<br>監修：山岡サラ（サラグラシアアカデミー）</p>',
             unsafe_allow_html=True)
 
@@ -154,7 +154,7 @@ if not input_valid:
     elif not narrative_filled:
         st.warning("⚠️ 自由記述2問にそれぞれ50字以上ご記入ください（あなたの言葉が診断の深さを決めます）。")
 
-if st.button("✨ あなたのDNAを診断する ✨", disabled=not input_valid):
+if st.button("✨ あなたの人生開花タイプを診断する ✨", disabled=not input_valid):
     with st.spinner("あなたの占術データと性格を計算中... 🔮"):
         user_input = {
             "name": f"{last_name} {first_name}",
@@ -236,7 +236,7 @@ if st.button("✨ あなたのDNAを診断する ✨", disabled=not input_valid)
 st.divider()
 st.markdown("""
 <div style='text-align:center; color:#888; font-size:0.85em; margin-top:30px;'>
-    DNA 診断 v3.2 — 18問拡張版<br>
+    人生開花タイプ診断 v4.0<br>
     監修：山岡サラ（サラグラシアアカデミー）<br>
     『人生は、何度でも再起動できる』
 </div>
