@@ -63,7 +63,7 @@ with col1:
     first_name = st.text_input("名（漢字）", placeholder="サラ")
 with col2:
     name_kana = st.text_input("お名前（カタカナ）", placeholder="ヤマオカサラ")
-    email = st.text_input("メールアドレス（任意）", placeholder="your@email.com")
+    email = st.text_input("📧 メールアドレス（必須・診断結果のPDFをお送りします）", placeholder="your@email.com")
 
 col3, col4, col5 = st.columns([2, 1, 2])
 with col3:
@@ -134,11 +134,13 @@ with st.expander("記入する（任意）", expanded=False):
 st.divider()
 
 input_valid = bool(last_name and first_name and name_kana and birth_place
-                   and answered >= 10)  # 最低10問は必須
+                   and email and "@" in email and answered >= 10)
 
 if not input_valid:
     if not (last_name and first_name and name_kana and birth_place):
         st.warning("⚠️ 基本情報（姓・名・カタカナ氏名・出生地）をすべて入力してください。")
+    elif not email or "@" not in email:
+        st.warning("⚠️ メールアドレスを入力してください（診断結果のPDFをメールでお送りします）。")
     elif answered < 10:
         st.warning(f"⚠️ 質問にあと {10 - answered} 問は回答してください（精度向上のため）。")
 
@@ -188,33 +190,31 @@ if st.button("✨ あなたのDNAを診断する ✨", disabled=not input_valid)
                     st.markdown(f"**🌙 次の天中殺：{next_p[0]}年〜{next_p[1]}年**")
 
             st.markdown("---")
-            st.markdown("### 📥 完全版レポートを受け取る")
+            st.markdown(f"### 📧 PDFレポートを **{email}** にお送りします")
+            st.caption("8ページの完全版PDFが添付ファイルで届きます。")
 
-            # メール送信を優先表示
-            if email:
-                st.markdown(f"**📧 メールでPDFを受け取る（{email}）**")
-                st.caption("登録メールアドレスにPDFを添付してお送りします。")
-                if st.button("✉️ メールで送信する", key="send_email"):
-                    with st.spinner("メール送信中... 📨"):
-                        result = send_pdf_email(email, user_input['name'], pdf_path)
-                        if result['success']:
-                            st.success(f"✅ {result['message']}\n\n📬 メールボックスをご確認ください（迷惑メールフォルダもチェック）")
-                            st.balloons()
-                        else:
-                            st.error(f"❌ メール送信に失敗しました\n{result['message']}")
-                            st.info("以下からPDFを直接ダウンロードできます。")
+            with st.spinner("メール送信中... 📨"):
+                result = send_pdf_email(email, user_input['name'], pdf_path)
+                if result['success']:
+                    st.success(f"""
+✅ **{email} にメールを送信しました！**
 
-            # 直接ダウンロードも可
-            st.markdown("**または、PDFを直接ダウンロード**")
-            with open(pdf_path, "rb") as f:
-                st.download_button(
-                    label="📄 PDFをダウンロード",
-                    data=f.read(),
-                    file_name=f"DNA診断_{user_input['name'].replace(' ', '')}_{datetime.now().strftime('%Y%m%d')}.pdf",
-                    mime="application/pdf"
-                )
-            # 一時ファイルはメール送信後も保持（ボタンを2回押せるように）
-            # os.unlink(pdf_path) ← セッション内で消さない
+📬 メールボックスをご確認ください。
+
+⚠️ **届かない場合**：
+- 迷惑メールフォルダもチェックしてください
+- 5分待っても届かない場合は、メールアドレスを確認して再度診断してください
+                    """)
+                    st.balloons()
+                else:
+                    st.error(f"❌ メール送信に失敗しました\n\n{result['message']}")
+                    st.info("メールアドレスを確認して、もう一度診断してください。")
+
+            # 一時ファイルを削除
+            try:
+                os.unlink(pdf_path)
+            except Exception:
+                pass
 
         except Exception as e:
             st.error(f"診断中にエラーが発生しました：{e}")
