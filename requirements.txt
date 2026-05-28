@@ -6,3 +6,4 @@ requests
 pdfplumber
 lunar-python
 skyfield
+resend
