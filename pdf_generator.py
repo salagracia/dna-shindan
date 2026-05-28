@@ -21,29 +21,86 @@ FONT_BOLD = None
 
 
 def register_japanese_fonts():
+    """日本語フォント登録（環境別自動切替）
+    優先順位：
+    1. ローカル同梱 IPAex Gothic（fonts/ipaexg.ttf）← Render等のLinuxサーバー
+    2. Windows標準フォント
+    3. Mac標準フォント
+    4. Linuxシステムフォント
+    5. ReportLab CID内蔵フォント（最終フォールバック）
+    """
     global FONT_REGULAR, FONT_BOLD
-    font_candidates = [
+
+    # プロジェクトルートからのパス
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # 1. ローカル同梱 IPAex（最優先・どの環境でも動く）
+    local_fonts = [
+        ('IPAexGothic', os.path.join(project_dir, 'fonts', 'ipaexg.ttf'),
+                         os.path.join(project_dir, 'fonts', 'ipaexg.ttf')),
+        ('IPAexMincho', os.path.join(project_dir, 'fonts', 'ipaexm.ttf'),
+                         os.path.join(project_dir, 'fonts', 'ipaexm.ttf')),
+    ]
+
+    # 2. システム標準フォント候補
+    system_fonts = [
+        # Windows
         ('YuGothic', r'C:\Windows\Fonts\YuGothM.ttc', r'C:\Windows\Fonts\YuGothB.ttc'),
         ('Meiryo', r'C:\Windows\Fonts\meiryo.ttc', r'C:\Windows\Fonts\meiryob.ttc'),
         ('MSGothic', r'C:\Windows\Fonts\msgothic.ttc', r'C:\Windows\Fonts\msgothic.ttc'),
+        # Mac
+        ('HiraginoSans', '/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc',
+                          '/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc'),
+        # Linux (Render/Debian/Ubuntu系)
+        ('NotoSansCJK', '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+                         '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc'),
+        ('IPAexSys', '/usr/share/fonts/opentype/ipaexfont-gothic/ipaexg.ttf',
+                      '/usr/share/fonts/opentype/ipaexfont-gothic/ipaexg.ttf'),
     ]
-    for name, regular_path, bold_path in font_candidates:
+
+    all_candidates = local_fonts + system_fonts
+
+    for name, regular_path, bold_path in all_candidates:
         try:
             if os.path.exists(regular_path):
-                pdfmetrics.registerFont(TTFont(name, regular_path, subfontIndex=0))
+                # TTC（コレクション）と TTF を区別
+                if regular_path.endswith('.ttc'):
+                    pdfmetrics.registerFont(TTFont(name, regular_path, subfontIndex=0))
+                else:
+                    pdfmetrics.registerFont(TTFont(name, regular_path))
                 FONT_REGULAR = name
-                if os.path.exists(bold_path):
+
+                if os.path.exists(bold_path) and bold_path != regular_path:
                     try:
-                        pdfmetrics.registerFont(TTFont(f"{name}-Bold", bold_path, subfontIndex=0))
-                        FONT_BOLD = f"{name}-Bold"
+                        bold_name = f"{name}-Bold"
+                        if bold_path.endswith('.ttc'):
+                            pdfmetrics.registerFont(TTFont(bold_name, bold_path, subfontIndex=0))
+                        else:
+                            pdfmetrics.registerFont(TTFont(bold_name, bold_path))
+                        FONT_BOLD = bold_name
                     except Exception:
                         FONT_BOLD = name
                 else:
                     FONT_BOLD = name
+
+                print(f"[FONT] Registered: {name} (regular={regular_path})")
                 return
-        except Exception:
+        except Exception as e:
+            print(f"[FONT] Failed {name}: {e}")
             continue
-    raise RuntimeError("日本語フォントが見つかりません")
+
+    # 5. ReportLab CID内蔵フォント（フォールバック・PDF Viewer依存）
+    try:
+        from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+        pdfmetrics.registerFont(UnicodeCIDFont('HeiseiKakuGo-W5'))
+        FONT_REGULAR = 'HeiseiKakuGo-W5'
+        FONT_BOLD = 'HeiseiKakuGo-W5'
+        print(f"[FONT] Registered CID fallback: HeiseiKakuGo-W5")
+        return
+    except Exception as e:
+        print(f"[FONT] CID font fallback failed: {e}")
+
+    raise RuntimeError("日本語フォントが見つかりません（IPAex fontsがリポジトリに含まれているか確認してください）")
 
 
 def make_styles():

@@ -31,6 +31,10 @@ output/*.pdf
 # Skyfield ephemeris (大きいファイル)
 *.bsp
 
+# フォントファイルはリポジトリに含める（gitignoreしない）
+!fonts/*.ttf
+!fonts/*.ttc
+
 # サラさん専用データ（公開しない）
 resources/dna-shindan-サラ*
 resources/サラのプロフィール*
