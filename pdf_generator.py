@@ -430,6 +430,27 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     story.append(Paragraph(strategy_text, styles['quote']))
     story.append(PageBreak())
 
+    # ============== 数秘ライフパス 深掘りページ ==============
+    lp_deep = result.get('numerology', {}).get('life_path_deep', {})
+    if lp_deep:
+        story.append(Paragraph(f"数秘ライフパス {n['life_path']['number']} — 深掘り解説", styles['h1']))
+        story.append(Paragraph(f"<b>{lp_deep.get('title', '')}</b>", styles['h2']))
+        story.append(Paragraph(lp_deep.get('essence', ''), styles['quote']))
+        story.append(Spacer(1, 3*mm))
+
+        story.append(Paragraph("💎 あなたの才能", styles['h3']))
+        story.append(Paragraph(lp_deep.get('talent', ''), styles['body']))
+
+        story.append(Paragraph("🌱 成長の余白（伸びしろ）", styles['h3']))
+        story.append(Paragraph(lp_deep.get('growth', ''), styles['body']))
+
+        story.append(Paragraph("🌟 魂の使命", styles['h3']))
+        story.append(Paragraph(lp_deep.get('mission', ''), styles['body']))
+
+        story.append(Paragraph("🌸 50代以上のあなたへ", styles['h3']))
+        story.append(Paragraph(lp_deep.get('for_50s', ''), styles['quote']))
+        story.append(PageBreak())
+
     # ============== Page 8: 姓名判断（新規追加） ==============
     seimei = result.get('seimei', {})
     if seimei:

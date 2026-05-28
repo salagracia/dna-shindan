@@ -8,7 +8,7 @@ import json
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from calculations.numerology import life_path_number, birth_day_number, destiny_number_from_name
+from calculations.numerology import life_path_number, birth_day_number, destiny_number_from_name, get_life_path_deep
 from calculations.western_astrology import get_sun_sign, get_moon_sign, get_ascendant
 from calculations.kyusei import honmei_star, gekkimei_star
 from calculations.shichuusuimei import year_pillar, month_pillar, day_pillar, hour_pillar
@@ -30,9 +30,11 @@ def run_diagnosis(user_input: dict) -> dict:
     lat = user_input.get("lat", 35.6762)
     lon = user_input.get("lon", 139.6503)
 
+    lp = life_path_number(year, month, day)
     result = {
         "numerology": {
-            "life_path": life_path_number(year, month, day),
+            "life_path": lp,
+            "life_path_deep": get_life_path_deep(lp["number"]),
             "birth_day": birth_day_number(day),
             "destiny": destiny_number_from_name(user_input.get("name_kana", "")),
         },
