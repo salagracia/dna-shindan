@@ -14,9 +14,35 @@ from calculations.kyusei import honmei_star, gekkimei_star
 from calculations.shichuusuimei import year_pillar, month_pillar, day_pillar, hour_pillar
 from calculations.doubutsu_teiou import get_doubutsu_kyara, get_teiougaku, get_shusei
 from calculations.personality_quiz import calculate_mbti, calculate_wd
+from calculations.jinsei_kaika import calculate_jinsei_kaika
 from calculations.tenchuusatsu import get_tenchusatsu, get_year_fortune, get_tenchusatsu_years, get_multi_year_fortune
 from calculations.seimei_handan import seimei_handan
 from pdf_generator import generate_pdf
+
+
+def _build_personality(answers: dict) -> dict:
+    """人生開花タイプ診断 + MBTI/WD互換形式"""
+    kaika = calculate_jinsei_kaika(answers)
+    # MBTI/WD互換のダミーを作って既存PDF構造を維持
+    compat = {
+        "type": kaika['type'],
+        "label": kaika['name'],
+        "subtitle": kaika['tagline'],
+        "summary": kaika['summary'],
+        "strengths": kaika['strengths'],
+        "weaknesses": [kaika['growth']],
+        "relationships": kaika['best_partner'],
+        "career": kaika['fortune_strategy'],
+        "challenge": kaika['growth'],
+        "love_match": kaika['best_partner'],
+        "biz_match": kaika['best_partner'],
+        "fortune_strategy": kaika['fortune_strategy'],
+    }
+    return {
+        "jinsei_kaika": kaika,
+        "mbti": compat,
+        "wd": compat,
+    }
 
 
 def run_diagnosis(user_input: dict) -> dict:
@@ -56,10 +82,7 @@ def run_diagnosis(user_input: dict) -> dict:
         "doubutsu": get_doubutsu_kyara(year, month, day),
         "shusei": get_shusei(year, month, day),
         "teiou": get_teiougaku(year, month, day),
-        "personality": {
-            "mbti": calculate_mbti(user_input.get("answers", {})),
-            "wd": calculate_wd(user_input.get("answers", {})),
-        },
+        "personality": _build_personality(user_input.get("answers", {})),
         "fortune": get_year_fortune(year, month, day),
         "fortune_3years": get_multi_year_fortune(year, month, day, datetime.now().year, datetime.now().year + 2),
         "tenchusatsu_years": get_tenchusatsu_years(year, month, day),
@@ -82,13 +105,7 @@ def main():
         "birth_place": "長崎県 長崎市",
         "lat": 32.75,
         "lon": 129.88,
-        "answers": {
-            "Q1": "A", "Q2": "A",
-            "Q3": "B", "Q4": "B",
-            "Q5": "B", "Q6": "B",
-            "Q7": "B", "Q8": "B",
-            "WD1": "A",
-        }
+        "answers": {f"K{i}": "5" for i in range(1, 21)}
     }
 
     print("=== 計算開始 ===")

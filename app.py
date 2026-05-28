@@ -12,7 +12,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from main import run_diagnosis
 from pdf_generator import generate_pdf
-from calculations.personality_quiz import ALL_QUESTIONS, NARRATIVE_QUESTIONS
+from calculations.personality_quiz import NARRATIVE_QUESTIONS
+from calculations.jinsei_kaika import QUESTIONS as KAIKA_QUESTIONS, LIKERT_OPTIONS
 from email_sender import send_pdf_email
 
 
@@ -82,33 +83,35 @@ birth_place = st.text_input("出生地（都道府県＋市町村）",
                               placeholder="例：東京都新宿区 / 大阪府大阪市")
 
 
-# ========== Step 2: 性格診断（18問） ==========
+# ========== Step 2: 人生開花タイプ診断（20問） ==========
 st.divider()
-st.subheader("🧠 Step 2：性格診断（18問）")
+st.subheader("🌸 Step 2：人生開花タイプ診断（20問）")
 st.caption("直感で、最も近いものを選んでください。所要時間 約5分。")
+st.info("💡 この20問の回答から、あなたの **人生開花タイプ（8タイプ）** が判定されます。")
 
 all_answers = {}
-progress = st.progress(0)
+likert_keys = list(LIKERT_OPTIONS.keys())  # "5","4","3","2","1"
+likert_labels = {k: v[0] for k, v in LIKERT_OPTIONS.items()}
 
-with st.expander("質問を開始する（18問）", expanded=False):
-    for i, q in enumerate(ALL_QUESTIONS, 1):
+with st.expander("質問を開始する（20問）", expanded=True):
+    for i, q in enumerate(KAIKA_QUESTIONS, 1):
         st.markdown(f"**Q{i}. {q['question']}**")
-        option_labels = {k: v[0] for k, v in q['options'].items()}
         ans = st.radio(
             label=q['question'],
-            options=list(option_labels.keys()),
-            format_func=lambda x, labels=option_labels: f"{x}: {labels[x]}",
+            options=likert_keys,
+            format_func=lambda x, labels=likert_labels: labels[x],
             key=f"q_{q['id']}",
             label_visibility="collapsed",
-            index=None
+            index=None,
+            horizontal=True
         )
         all_answers[q['id']] = ans
         st.markdown("")
 
 # プログレス計算
 answered = sum(1 for v in all_answers.values() if v is not None)
-progress.progress(answered / len(ALL_QUESTIONS))
-st.caption(f"📊 進捗：{answered} / {len(ALL_QUESTIONS)} 問")
+progress = st.progress(answered / len(KAIKA_QUESTIONS))
+st.caption(f"📊 進捗：{answered} / {len(KAIKA_QUESTIONS)} 問")
 
 
 # ========== Step 3: 自由記述（必須・2問） ==========
@@ -138,7 +141,7 @@ narrative_filled = all(len(narrative_answers.get(n['id'], '').strip()) >= 50
                         for n in NARRATIVE_QUESTIONS)
 
 input_valid = bool(last_name and first_name and name_kana and birth_place
-                   and email and "@" in email and answered >= 10
+                   and email and "@" in email and answered >= 15
                    and narrative_filled)
 
 if not input_valid:
@@ -146,8 +149,8 @@ if not input_valid:
         st.warning("⚠️ 基本情報（姓・名・カタカナ氏名・出生地）をすべて入力してください。")
     elif not email or "@" not in email:
         st.warning("⚠️ メールアドレスを入力してください（診断結果のPDFをメールでお送りします）。")
-    elif answered < 10:
-        st.warning(f"⚠️ 質問にあと {10 - answered} 問は回答してください（精度向上のため）。")
+    elif answered < 15:
+        st.warning(f"⚠️ 質問にあと {15 - answered} 問は回答してください（精度向上のため・最低15問必須）。")
     elif not narrative_filled:
         st.warning("⚠️ 自由記述2問にそれぞれ50字以上ご記入ください（あなたの言葉が診断の深さを決めます）。")
 
