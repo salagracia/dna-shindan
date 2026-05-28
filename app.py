@@ -164,7 +164,7 @@ if st.button("✨ あなたのDNAを診断する ✨", disabled=not input_valid)
                 pdf_path = tmp.name
             generate_pdf(user_input, result, pdf_path)
 
-            st.success("✅ 診断完了！下のボタンからPDFをダウンロードしてください。")
+            st.success("✅ 診断完了！レポートPDFをメールでお送りします。")
             st.markdown("---")
             st.markdown("### 🔮 あなたの主要結果")
 
