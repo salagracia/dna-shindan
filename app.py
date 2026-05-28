@@ -111,30 +111,35 @@ progress.progress(answered / len(ALL_QUESTIONS))
 st.caption(f"📊 進捗：{answered} / {len(ALL_QUESTIONS)} 問")
 
 
-# ========== Step 3: 自由記述（任意・2問） ==========
+# ========== Step 3: 自由記述（必須・2問） ==========
 st.divider()
-st.subheader("✍️ Step 3：自由記述（任意・2問）")
-st.caption("時間がある方のみ。記入するとあなたの人物像がより深く描き出されます。")
+st.subheader("✍️ Step 3：自由記述（必須・2問）")
+st.caption("あなたの言葉が、診断の深さを決めます。200字以上、書ける範囲で具体的にお願いします。")
+st.info("💡 この2問の回答から、あなたの **才能の指紋・落とし穴・価値観のコンパス** が浮かび上がります。")
 
 narrative_answers = {}
-with st.expander("記入する（任意）", expanded=False):
-    for n in NARRATIVE_QUESTIONS:
-        st.markdown(f"**{n['question']}**")
-        st.caption(f"💡 ヒント：{n['hint']}")
-        ans = st.text_area(
-            label=n['question'], key=f"n_{n['id']}",
-            label_visibility="collapsed", height=100,
-            max_chars=n['max_length'], placeholder="（任意・空白でもOK）"
-        )
-        narrative_answers[n['id']] = ans
-        st.markdown("")
+for n in NARRATIVE_QUESTIONS:
+    st.markdown(f"**{n['question']}**")
+    st.caption(f"💡 ヒント：{n['hint']}")
+    ans = st.text_area(
+        label=n['question'], key=f"n_{n['id']}",
+        label_visibility="collapsed", height=150,
+        max_chars=n['max_length'],
+        placeholder="（200字以上を目安に、できるだけ具体的に）"
+    )
+    narrative_answers[n['id']] = ans
+    st.markdown("")
 
 
 # ========== 診断ボタン ==========
 st.divider()
 
+narrative_filled = all(len(narrative_answers.get(n['id'], '').strip()) >= 50
+                        for n in NARRATIVE_QUESTIONS)
+
 input_valid = bool(last_name and first_name and name_kana and birth_place
-                   and email and "@" in email and answered >= 10)
+                   and email and "@" in email and answered >= 10
+                   and narrative_filled)
 
 if not input_valid:
     if not (last_name and first_name and name_kana and birth_place):
@@ -143,6 +148,8 @@ if not input_valid:
         st.warning("⚠️ メールアドレスを入力してください（診断結果のPDFをメールでお送りします）。")
     elif answered < 10:
         st.warning(f"⚠️ 質問にあと {10 - answered} 問は回答してください（精度向上のため）。")
+    elif not narrative_filled:
+        st.warning("⚠️ 自由記述2問にそれぞれ50字以上ご記入ください（あなたの言葉が診断の深さを決めます）。")
 
 if st.button("✨ あなたのDNAを診断する ✨", disabled=not input_valid):
     with st.spinner("あなたの占術データと性格を計算中... 🔮"):
