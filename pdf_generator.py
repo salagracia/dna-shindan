@@ -430,8 +430,62 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     story.append(Paragraph(strategy_text, styles['quote']))
     story.append(PageBreak())
 
-    # ============== Page 8: これからの行動指針 ==============
-    story.append(Paragraph("第7章：これから1年の行動指針", styles['h1']))
+    # ============== Page 8: 姓名判断（新規追加） ==============
+    seimei = result.get('seimei', {})
+    if seimei:
+        story.append(Paragraph("第7章：姓名判断 — 名前という、最初の贈り物", styles['h1']))
+        story.append(Spacer(1, 3*mm))
+
+        story.append(Paragraph(
+            seimei.get('intro', '').replace('\n', '<br/>'),
+            styles['quote']
+        ))
+        story.append(Spacer(1, 4*mm))
+
+        # 五格テーブル
+        story.append(Paragraph("📜 あなたの五格", styles['h2']))
+        gokaku = seimei.get('gokaku', {})
+        gokaku_data = [
+            ['格', '画数', '数霊の名', '役割'],
+            ['天格', str(gokaku.get('tenkaku', 0)), seimei['tenkaku']['name'], '先祖から受け継ぐ運'],
+            ['人格 ★', str(gokaku.get('jinkaku', 0)), seimei['jinkaku']['name'], 'あなたの本質（主運）'],
+            ['地格', str(gokaku.get('chikaku', 0)), seimei['chikaku']['name'], '青年期までの基礎'],
+            ['外格', str(gokaku.get('gaikaku', 0)), seimei['gaikaku']['name'], '社会での印象'],
+            ['総格', str(gokaku.get('soukaku', 0)), seimei['soukaku']['name'], '人生全体の大運'],
+        ]
+        tbl = Table(gokaku_data, colWidths=[18*mm, 16*mm, 50*mm, 56*mm])
+        tbl.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), FONT_REGULAR), ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('FONTNAME', (0, 0), (-1, 0), FONT_BOLD),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#8B4789')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#FBE9EC')),  # 人格行をハイライト
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#999999')),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 4),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        story.append(tbl)
+        story.append(Spacer(1, 4*mm))
+
+        # 主運（人格）の詳細解説
+        story.append(Paragraph(f"⭐ あなたの主運：{seimei['jinkaku']['name']}", styles['h3']))
+        story.append(Paragraph(seimei['jinkaku']['description'], styles['body']))
+        story.append(Spacer(1, 3*mm))
+
+        # 総格（人生全体）
+        story.append(Paragraph(f"🌸 人生全体の大運：{seimei['soukaku']['name']}", styles['h3']))
+        story.append(Paragraph(seimei['soukaku']['description'], styles['body']))
+        story.append(Spacer(1, 3*mm))
+
+        # 三才配置
+        sansai = seimei.get('sansai', {})
+        story.append(Paragraph(f"🌳 三才配置：{sansai.get('combo', '')}", styles['h3']))
+        story.append(Paragraph(sansai.get('meaning', ''), styles['body']))
+        story.append(PageBreak())
+
+    # ============== Page 9: これからの行動指針 ==============
+    story.append(Paragraph("第8章：これから1年の行動指針", styles['h1']))
     story.append(Spacer(1, 5*mm))
 
     story.append(Paragraph("🌸 あなたが今年取るべき3つのアクション", styles['h2']))
@@ -462,9 +516,52 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         styles['quote']
     ))
 
+    story.append(PageBreak())
+
+    # ============== Page 10: サラからの手紙 ==============
+    story.append(Spacer(1, 15*mm))
+    story.append(Paragraph("あなたへ — サラからの手紙", styles['title']))
+    story.append(Spacer(1, 10*mm))
+
+    letter_paragraphs = [
+        "このレポートを読み終えたあなたに、伝えたいことがあります。",
+        "",
+        "50代を超えた女性は、「もう遅い」と思いがちです。<br/>"
+        "でも、それは社会が植え付けた幻想です。",
+        "",
+        "あなたの星、あなたの命、あなたの名前。<br/>"
+        "すべてが「<b>これからが本番</b>」と語っています。",
+        "",
+        "老いることは、衰えることではありません。<br/>"
+        "<b>深まること。磨かれること。本物になっていくこと</b>。",
+        "",
+        "これからのあなたは、20代の自分には決して手に入らなかった——<br/>"
+        "<b>ゆるぎない美しさ・本物の自由・深い愛</b>を、<br/>"
+        "1年ごとに重ねていく女性です。",
+        "",
+        "恐れないでください。<br/>"
+        "<b>あなたの最も美しい時間は、これから始まります。</b>",
+    ]
+    for p in letter_paragraphs:
+        if p:
+            story.append(Paragraph(p, styles['body']))
+        else:
+            story.append(Spacer(1, 3*mm))
+
+    story.append(Spacer(1, 10*mm))
+    story.append(Paragraph(
+        "<b>『人生は、何度でも再起動できる』</b>",
+        styles['quote']
+    ))
     story.append(Spacer(1, 8*mm))
     story.append(Paragraph(
-        f"DNA 診断 v3.0 / 監修：山岡サラ・サラ・グラシアアカデミー<br/>"
+        "山岡サラ<br/>サラグラシアアカデミー",
+        styles['small']
+    ))
+
+    story.append(Spacer(1, 8*mm))
+    story.append(Paragraph(
+        f"DNA 診断 v4.0 / 監修：山岡サラ・サラグラシアアカデミー<br/>"
         f"発行日：{datetime.now().strftime('%Y年%m月%d日')}",
         styles['small']
     ))

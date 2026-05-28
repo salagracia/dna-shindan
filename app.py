@@ -155,6 +155,8 @@ if st.button("✨ あなたのDNAを診断する ✨", disabled=not input_valid)
     with st.spinner("あなたの占術データと性格を計算中... 🔮"):
         user_input = {
             "name": f"{last_name} {first_name}",
+            "last_name": last_name,
+            "first_name": first_name,
             "name_kana": name_kana,
             "birth_date": birth_date_input.strftime("%Y-%m-%d"),
             "birth_time": birth_time_input.strftime("%H:%M"),
