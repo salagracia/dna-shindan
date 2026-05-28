@@ -21,22 +21,26 @@ from pdf_generator import generate_pdf
 
 
 def _build_personality(answers: dict) -> dict:
-    """人生開花タイプ診断 + MBTI/WD互換形式"""
+    """人生開花タイプ診断（公式版）+ MBTI/WD互換形式"""
     kaika = calculate_jinsei_kaika(answers)
+    # 最初の段落をサマリーに（「あなたは『〇〇な人』です」）
+    body_lines = kaika['body'].split("\n\n")
+    summary = body_lines[0] if body_lines else ""
     # MBTI/WD互換のダミーを作って既存PDF構造を維持
     compat = {
         "type": kaika['type'],
         "label": kaika['name'],
         "subtitle": kaika['tagline'],
-        "summary": kaika['summary'],
-        "strengths": kaika['strengths'],
-        "weaknesses": [kaika['growth']],
-        "relationships": kaika['best_partner'],
-        "career": kaika['fortune_strategy'],
-        "challenge": kaika['growth'],
-        "love_match": kaika['best_partner'],
-        "biz_match": kaika['best_partner'],
-        "fortune_strategy": kaika['fortune_strategy'],
+        "summary": summary,
+        "strengths": [kaika['tagline']],
+        "weaknesses": [],
+        "relationships": f"あなたの隠れ才能：{kaika['second_name']}（{kaika['second_tagline']}）",
+        "career": kaika['tagline'],
+        "challenge": "",
+        "love_match": f"隠れ才能の「{kaika['second_name']}」を組み合わせると、関係性が深まります。",
+        "biz_match": f"隠れ才能の「{kaika['second_name']}」を組み合わせると、新しい才能が開きます。",
+        "fortune_strategy": kaika['body'],
+        "body": kaika['body'],
     }
     return {
         "jinsei_kaika": kaika,
