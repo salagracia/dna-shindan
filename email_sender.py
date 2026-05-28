@@ -115,7 +115,7 @@ https://salagracia.com
         params = {
             "from": f"{from_name} <{from_email}>",
             "to": [to_email],
-            "subject": "【DNA診断】あなたのレポートが完成しました 🌹",
+            "subject": "【人生開花タイプ診断】あなたのレポートが完成しました 🌹",
             "html": html_body,
             "text": text_body,
             "attachments": [

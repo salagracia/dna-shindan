@@ -149,14 +149,14 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         output_path, pagesize=A4,
         leftMargin=18*mm, rightMargin=18*mm,
         topMargin=18*mm, bottomMargin=18*mm,
-        title=f"DNA診断レポート - {user_data['name']}"
+        title=f"人生開花タイプ診断レポート - {user_data['name']}"
     )
 
     story = []
 
     # ============== Page 1: 表紙 ==============
     story.append(Spacer(1, 25*mm))
-    story.append(Paragraph("DNA 診断レポート", styles['title']))
+    story.append(Paragraph("人生開花タイプ診断レポート", styles['title']))
     story.append(Paragraph("人生再起動のための、あなた専用の設計図", styles['small']))
     story.append(Spacer(1, 30*mm))
 
@@ -582,7 +582,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     story.append(Spacer(1, 8*mm))
     story.append(Paragraph(
-        f"DNA 診断 v4.0 / 監修：山岡サラ・サラグラシアアカデミー<br/>"
+        f"人生開花タイプ診断 v4.0 / 監修：山岡サラ・サラグラシアアカデミー<br/>"
         f"発行日：{datetime.now().strftime('%Y年%m月%d日')}",
         styles['small']
     ))

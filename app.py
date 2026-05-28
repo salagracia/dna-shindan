@@ -1,5 +1,5 @@
 """
-DNA診断 Webアプリ（Streamlit）v3.2
+人生開花タイプ診断 Webアプリ（Streamlit）v3.2
 18問拡張版・7軸総合判定
 """
 import streamlit as st
@@ -18,7 +18,7 @@ from email_sender import send_pdf_email
 
 
 st.set_page_config(
-    page_title="DNA診断 - サラ・グラシアアカデミー",
+    page_title="人生開花タイプ診断 - サラ・グラシアアカデミー",
     page_icon="🌹",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -42,7 +42,7 @@ st.markdown('<p class="sub-header">人生再起動のための、あなた専用
             unsafe_allow_html=True)
 
 st.markdown("""
-このDNA診断は、東洋・西洋の占術9種類と現代心理学7軸を統合して、
+この人生開花タイプ診断は、東洋・西洋の占術9種類と現代心理学7軸を統合して、
 **あなたという唯一無二の存在**を立体的に描き出します。
 
 🔮 **占術**：数秘・西洋占星術・九星気学・四柱推命・動物キャラ・算命学・帝王学
