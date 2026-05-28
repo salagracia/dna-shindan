@@ -214,8 +214,8 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
          result['doubutsu']['meaning']],
         ['算命学（主星）', result['shusei']['name'], result['shusei']['meaning'][:30]],
         ['帝王学', result['teiou']['name'], result['teiou']['meaning'][:30]],
-        ['16パーソナリティ', result['personality']['mbti']['type'], result['personality']['mbti'].get('label', '')],
-        ['ウェルスダイナミクス', result['personality']['wd']['type'], result['personality']['wd'].get('subtitle', '')],
+        ['人生開花タイプ（メイン）', result['personality']['jinsei_kaika']['type'], result['personality']['jinsei_kaika'].get('name', '')],
+        ['隠れ才能タイプ', result['personality']['jinsei_kaika'].get('second_type', ''), result['personality']['jinsei_kaika'].get('second_name', '')],
     ]
 
     tbl = Table(occult_data, colWidths=[38*mm, 55*mm, 77*mm])
@@ -235,9 +235,9 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     story.append(tbl)
     story.append(PageBreak())
 
-    # ============== Page 3: 16パーソナリティ詳細 ==============
+    # ============== Page 3: 人生開花タイプ詳細（メイン） ==============
     mbti = result['personality']['mbti']
-    story.append(Paragraph(f"第2章：16パーソナリティ詳細", styles['h1']))
+    story.append(Paragraph(f"第2章：あなたの人生開花タイプ", styles['h1']))
     story.append(Paragraph(f"あなたのタイプ：<b>{mbti['type']} — {mbti.get('label', '')}</b>", styles['h2']))
     story.append(Paragraph(mbti.get('summary', ''), styles['quote']))
 
@@ -257,9 +257,9 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     story.append(Paragraph(mbti.get('challenge', ''), styles['tip']))
     story.append(PageBreak())
 
-    # ============== Page 4: ウェルスダイナミクス詳細 ==============
+    # ============== Page 4: 隠れ才能タイプ（第2位） ==============
     wd = result['personality']['wd']
-    story.append(Paragraph(f"第3章：ウェルスダイナミクス詳細", styles['h1']))
+    story.append(Paragraph(f"第3章：あなたの隠れ才能タイプ", styles['h1']))
     story.append(Paragraph(f"あなたのタイプ：<b>{wd['type']} — {wd.get('label', '')}</b>", styles['h2']))
     story.append(Paragraph(f"戦略：{wd.get('subtitle', '')}", styles['h3']))
     story.append(Paragraph(wd.get('summary', ''), styles['quote']))
