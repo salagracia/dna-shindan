@@ -9,6 +9,104 @@ import os
 import base64
 
 
+def send_admin_notification(user_data: dict, result: dict, pdf_path: str) -> dict:
+    """管理者（サラさん）への診断完了通知＋データベース記録用メール
+    monthly@salagracia.com に「リスト追加」メールを送信
+    Gmail で検索可能なリストとして蓄積する
+    """
+    import resend
+    api_key = os.environ.get('RESEND_API_KEY', '')
+    from_email = os.environ.get('FROM_EMAIL', 'monthly@salagracia.com')
+    admin_email = os.environ.get('ADMIN_EMAIL', 'monthly@salagracia.com')
+
+    if not api_key:
+        return {"success": False, "message": "RESEND_API_KEY未設定"}
+
+    resend.api_key = api_key
+
+    kaika = result.get('jinsei_kaika') or result.get('personality', {}).get('jinsei_kaika', {})
+    ws = result.get('western_astrology', {})
+    doubutsu = result.get('doubutsu', {})
+    shusei = result.get('shusei', {})
+    seimei = result.get('seimei', {})
+    teiou = result.get('teiou', {})
+    sp = result.get('shichuusuimei', {})
+    n = result.get('numerology', {})
+
+    user_name = user_data.get('name', '不明')
+    user_email = user_data.get('email_to', user_data.get('email', '不明'))
+    birth = user_data.get('birth_date', '不明')
+
+    subject = f"【人生開花リスト追加】{user_name}さん｜{kaika.get('name', '?')}×{kaika.get('second_name', '?')}"
+
+    html_body = f"""
+<!DOCTYPE html>
+<html><body style="font-family: sans-serif; max-width: 600px;">
+
+<h2 style="color: #8B4789;">📊 新規診断レコード</h2>
+
+<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
+  <tr style="background: #F4ECF7;"><td><b>氏名</b></td><td>{user_name}</td></tr>
+  <tr><td><b>メール</b></td><td>{user_email}</td></tr>
+  <tr style="background: #F4ECF7;"><td><b>生年月日</b></td><td>{birth}</td></tr>
+  <tr><td><b>出生地</b></td><td>{user_data.get('birth_place', '不明')}</td></tr>
+  <tr style="background: #F4ECF7;"><td><b>診断日</b></td><td>{datetime.now().strftime('%Y-%m-%d %H:%M')}</td></tr>
+</table>
+
+<h3 style="color: #8B4789;">🌸 人生開花タイプ</h3>
+<ul>
+  <li><b>メイン：{kaika.get('name', '?')}</b>（{kaika.get('tagline', '')}）— {kaika.get('score', 0)}/24点</li>
+  <li><b>隠れ才能：{kaika.get('second_name', '?')}</b>（{kaika.get('second_tagline', '')}）— {kaika.get('second_score', 0)}/24点</li>
+</ul>
+
+<h3 style="color: #8B4789;">🔮 占術データ</h3>
+<table border="1" cellpadding="6" style="border-collapse: collapse; font-size: 0.9em;">
+  <tr><td>太陽星座</td><td>{ws.get('sun', {}).get('name', '')}</td></tr>
+  <tr><td>月星座</td><td>{ws.get('moon', {}).get('name', '')}</td></tr>
+  <tr><td>本命星</td><td>{result.get('kyusei', {}).get('honmei', {}).get('name', '')}</td></tr>
+  <tr><td>日柱</td><td>{sp.get('day', {}).get('kanshi', '')}</td></tr>
+  <tr><td>動物キャラ</td><td>{doubutsu.get('name_60', '')}（{doubutsu.get('name_12', '')}）</td></tr>
+  <tr><td>算命学主星</td><td>{shusei.get('name', '')}</td></tr>
+  <tr><td>帝王学</td><td>{teiou.get('name', '')}</td></tr>
+  <tr><td>姓名判断（主運）</td><td>{seimei.get('jinkaku', {}).get('name', '')}</td></tr>
+  <tr><td>ライフパス</td><td>{n.get('life_path', {}).get('number', '')}</td></tr>
+</table>
+
+<h3 style="color: #8B4789;">📝 自由記述</h3>
+<p style="background: #f9f9f9; padding: 10px;"><b>夢中体験：</b><br>{user_data.get('narrative', {}).get('N1', '記入なし')}</p>
+<p style="background: #f9f9f9; padding: 10px;"><b>譲れない信念：</b><br>{user_data.get('narrative', {}).get('N2', '記入なし')}</p>
+
+<hr>
+<p style="color: #888; font-size: 0.85em;">
+このメールは管理者向け自動送信です。<br>
+Gmail で「人生開花リスト」「{kaika.get('name', '')}」などで検索すると関連レコードが取り出せます。
+</p>
+
+</body></html>
+"""
+
+    try:
+        # PDF添付
+        import base64
+        with open(pdf_path, 'rb') as f:
+            pdf_b64 = base64.b64encode(f.read()).decode()
+
+        params = {
+            "from": f"サラグラシアアカデミー <{from_email}>",
+            "to": [admin_email],
+            "subject": subject,
+            "html": html_body,
+            "attachments": [{
+                "filename": f"診断_{user_name}.pdf",
+                "content": pdf_b64,
+            }],
+        }
+        email_obj = resend.Emails.send(params)
+        return {"success": True, "message": f"管理者通知送信完了: {email_obj.get('id', '?')}"}
+    except Exception as e:
+        return {"success": False, "message": f"管理者通知エラー: {e}"}
+
+
 def send_pdf_email(to_email: str, user_name: str, pdf_path: str) -> dict:
     """PDF添付メールを Resend API 経由で送信"""
     api_key = os.environ.get('RESEND_API_KEY', '')

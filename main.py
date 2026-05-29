@@ -21,19 +21,46 @@ from pdf_generator import generate_pdf
 
 
 def _build_personality(answers: dict) -> dict:
-    """石野さん版18問 + チャッピー版20問の両方を判定
-    - MBTI/WD/エニア/RIASEC/愛の言語/VAK/アタッチメント（石野さん版から）
-    - 人生開花タイプ（メイン+隠れ才能・チャッピー版から）
+    """人生開花タイプ診断（24問・4タイプ・サラグラシア独自）
+    メインタイプ + 隠れ才能タイプ を判定
+    PDF互換のため mbti=メイン、wd=隠れ才能として割り当て
     """
-    # 石野さん版：MBTI/WD/その他7軸
-    mbti = calculate_mbti(answers)
-    wd = calculate_wd(answers)
-    # チャッピー版：人生開花タイプ
     kaika = calculate_jinsei_kaika(answers)
 
+    # メインタイプ（PDF第2章で表示）
+    main_compat = {
+        "type": kaika['type'],
+        "label": kaika['name'],
+        "subtitle": kaika['tagline'],
+        "summary": kaika['body'],
+        "strengths": [kaika['tagline']],
+        "weaknesses": ["あなたの才能を信じる勇気を持つこと"],
+        "relationships": f"あなたの隠れ才能タイプは「{kaika['second_name']}」（{kaika['second_tagline']}）。両方の才能を活かすと、人生がさらに深まります。",
+        "career": kaika['tagline'],
+        "challenge": f"本来のあなたを表現する場を意識的に作ること。",
+        "love_match": f"隠れ才能「{kaika['second_name']}」と組み合わせると、関係性が深まります。",
+        "biz_match": f"「{kaika['name']}」と「{kaika['second_name']}」の両方を活かせる場で輝きます。",
+        "fortune_strategy": kaika['body'],
+        "body": kaika['body'],
+    }
+
+    # 隠れ才能タイプ（PDF第3章で表示）
+    second_compat = {
+        "type": kaika['second_type'],
+        "label": kaika['second_name'],
+        "subtitle": kaika['second_tagline'],
+        "summary": kaika['second_body'],
+        "strengths": [kaika['second_tagline']],
+        "weaknesses": ["この才能を意識的に育てると、人生が一気に広がります"],
+        "fortune_strategy": kaika['second_body'],
+        "body": kaika['second_body'],
+        "biz_match": f"メインタイプ「{kaika['name']}」と組み合わせて発揮しましょう。",
+        "love_match": f"メインタイプ「{kaika['name']}」と組み合わせて発揮しましょう。",
+    }
+
     return {
-        "mbti": mbti,
-        "wd": wd,
+        "mbti": main_compat,
+        "wd": second_compat,
         "jinsei_kaika": kaika,
     }
 

@@ -12,9 +12,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from main import run_diagnosis
 from pdf_generator import generate_pdf
-from calculations.personality_quiz import NARRATIVE_QUESTIONS, ALL_QUESTIONS
-from calculations.jinsei_kaika import QUESTIONS as KAIKA_QUESTIONS, LIKERT_OPTIONS
-from email_sender import send_pdf_email
+from calculations.personality_quiz import NARRATIVE_QUESTIONS
+from calculations.jinsei_kaika import QUESTIONS as KAIKA_QUESTIONS
+from email_sender import send_pdf_email, send_admin_notification
 
 
 st.set_page_config(
@@ -46,12 +46,11 @@ st.markdown("""
 **あなたという唯一無二の存在**を立体的に描き出します。
 
 🔮 **占術**：数秘・西洋占星術・九星気学・四柱推命・動物キャラ・算命学・帝王学・姓名判断
-🧠 **心理診断**：16パーソナリティ・ウェルスダイナミクス・エニアグラム・職業興味・愛の言語・感覚優位・アタッチメント
-🌸 **独自診断**：**サラグラシア独自の人生開花タイプ診断**（ウェルスダイナミクスを元に50代女性向けに発展・8タイプ）
+🌸 **独自診断**：**サラグラシア独自の人生開花タイプ診断**（24問・4タイプ・メイン+隠れ才能）
 🌙 **運勢**：天中殺・3年間のキーワード
 ✍️ **自由記述**：夢中体験・譲れない信念（あなたの言葉が、診断の深さを決めます）
 
-**所要時間：約13〜18分**　→ **11ページの個人設計図PDF**をメールでお届け
+**所要時間：約10〜13分**　→ **11ページの個人設計図PDF**をメールでお届け
 """)
 
 st.divider()
@@ -85,69 +84,38 @@ birth_place = st.text_input("出生地（都道府県＋市町村）",
                               placeholder="例：東京都新宿区 / 大阪府大阪市")
 
 
-# ========== Step 2: 性格診断（18問・MBTI等の7軸判定） ==========
+# ========== Step 2: 人生開花タイプ診断（24問・4択A/B/C/D） ==========
 st.divider()
-st.subheader("🧠 Step 2：性格診断（18問）")
-st.caption("直感で、最も近いものを選んでください。所要時間 約5分。")
-st.info("💡 この18問から **16パーソナリティ・ウェルスダイナミクス・エニアグラム・職業興味・愛の言語・感覚優位・アタッチメント** の7軸を判定。")
+st.subheader("🌸 Step 2：人生開花タイプ診断（24問）")
+st.caption("「最も近いもの」を1つ選んでください。所要時間 約5分。")
+st.info("💡 サラグラシア独自の高精度診断。**メインタイプ + 隠れ才能タイプ**が判定されます。")
 
 all_answers = {}
 
-with st.expander("質問を開始する（18問・選択式）", expanded=False):
-    for i, q in enumerate(ALL_QUESTIONS, 1):
+with st.expander("質問を開始する（24問・4択）", expanded=True):
+    for i, q in enumerate(KAIKA_QUESTIONS, 1):
         st.markdown(f"**Q{i}. {q['question']}**")
-        option_labels = {k: v[0] for k, v in q['options'].items()}
+        options = q['options']  # {"A": "...", "B": "...", "C": "...", "D": "..."}
         ans = st.radio(
             label=q['question'],
-            options=list(option_labels.keys()),
-            format_func=lambda x, labels=option_labels: f"{x}: {labels[x]}",
-            key=f"q_{q['id']}",
+            options=list(options.keys()),
+            format_func=lambda x, opts=options: f"{x}: {opts[x]}",
+            key=f"qk_{q['id']}",
             label_visibility="collapsed",
             index=None
         )
         all_answers[q['id']] = ans
         st.markdown("")
 
-# プログレス計算（18問+20問=38問）
-answered_18 = sum(1 for q in ALL_QUESTIONS if all_answers.get(q['id']) is not None)
-st.caption(f"📊 性格診断 進捗：{answered_18} / {len(ALL_QUESTIONS)} 問")
+# プログレス計算（24問）
+answered = sum(1 for q in KAIKA_QUESTIONS if all_answers.get(q['id']) is not None)
+progress = st.progress(answered / len(KAIKA_QUESTIONS))
+st.caption(f"📊 進捗：{answered} / {len(KAIKA_QUESTIONS)} 問")
 
 
-# ========== Step 3: 人生開花タイプ診断（20問・5段階） ==========
+# ========== Step 3: 自由記述（必須・2問） ==========
 st.divider()
-st.subheader("🌸 Step 3：人生開花タイプ診断（20問）")
-st.caption("直感で、最も近いものを選んでください。所要時間 約5分。")
-st.info("💡 この20問から **サラグラシア独自の人生開花タイプ（8タイプ）** が判定されます。")
-
-likert_keys = list(LIKERT_OPTIONS.keys())
-likert_labels = {k: v[0] for k, v in LIKERT_OPTIONS.items()}
-
-with st.expander("質問を開始する（20問・5段階）", expanded=False):
-    for i, q in enumerate(KAIKA_QUESTIONS, 1):
-        st.markdown(f"**Q{i}. {q['question']}**")
-        ans = st.radio(
-            label=q['question'],
-            options=likert_keys,
-            format_func=lambda x, labels=likert_labels: labels[x],
-            key=f"qk_{q['id']}",
-            label_visibility="collapsed",
-            index=None,
-            horizontal=True
-        )
-        all_answers[q['id']] = ans
-        st.markdown("")
-
-# プログレス計算（人生開花のみ）
-answered_kaika = sum(1 for q in KAIKA_QUESTIONS if all_answers.get(q['id']) is not None)
-total = len(ALL_QUESTIONS) + len(KAIKA_QUESTIONS)
-answered = answered_18 + answered_kaika
-progress = st.progress(answered / total)
-st.caption(f"📊 全体進捗：{answered} / {total} 問")
-
-
-# ========== Step 4: 自由記述（必須・2問） ==========
-st.divider()
-st.subheader("✍️ Step 4：自由記述（必須・2問）")
+st.subheader("✍️ Step 3：自由記述（必須・2問）")
 st.caption("あなたの言葉が、診断の深さを決めます。200字以上、書ける範囲で具体的にお願いします。")
 st.info("💡 この2問の回答から、あなたの **才能の指紋・落とし穴・価値観のコンパス** が浮かび上がります。")
 
@@ -172,7 +140,7 @@ narrative_filled = all(len(narrative_answers.get(n['id'], '').strip()) >= 50
                         for n in NARRATIVE_QUESTIONS)
 
 input_valid = bool(last_name and first_name and name_kana and birth_place
-                   and email and "@" in email and answered >= 25
+                   and email and "@" in email and answered >= 20
                    and narrative_filled)
 
 if not input_valid:
@@ -180,8 +148,8 @@ if not input_valid:
         st.warning("⚠️ 基本情報（姓・名・カタカナ氏名・出生地）をすべて入力してください。")
     elif not email or "@" not in email:
         st.warning("⚠️ メールアドレスを入力してください（診断結果のPDFをメールでお送りします）。")
-    elif answered < 25:
-        st.warning(f"⚠️ 質問にあと {25 - answered} 問は回答してください（最低25問必須・精度向上のため）。")
+    elif answered < 20:
+        st.warning(f"⚠️ 質問にあと {20 - answered} 問は回答してください（最低20問必須・精度向上のため）。")
     elif not narrative_filled:
         st.warning("⚠️ 自由記述2問にそれぞれ50字以上ご記入ください（あなたの言葉が診断の深さを決めます）。")
 
@@ -237,6 +205,15 @@ if st.button("✨ あなたの人生開花タイプを診断する ✨", disable
             st.caption("8ページの完全版PDFが添付ファイルで届きます。")
 
             with st.spinner("メール送信中... 📨"):
+                # 管理者通知（バックグラウンド・サラさんのリストに追加）
+                user_input['email_to'] = email
+                user_input['narrative'] = narrative_answers
+                try:
+                    send_admin_notification(user_input, result, pdf_path)
+                except Exception:
+                    pass  # 管理者通知エラーはユーザー送信に影響させない
+
+                # ユーザーへのメール送信
                 result = send_pdf_email(email, user_input['name'], pdf_path)
                 if result['success']:
                     st.success(f"""
