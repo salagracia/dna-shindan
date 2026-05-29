@@ -205,17 +205,22 @@ if st.button("✨ あなたの人生開花タイプを診断する ✨", disable
             st.caption("8ページの完全版PDFが添付ファイルで届きます。")
 
             with st.spinner("メール送信中... 📨"):
-                # 管理者通知（バックグラウンド・サラさんのリストに追加）
+                # 管理者通知（サラさんのリストに追加）
                 user_input['email_to'] = email
                 user_input['narrative'] = narrative_answers
+                admin_result = None
                 try:
-                    send_admin_notification(user_input, result, pdf_path)
-                except Exception:
-                    pass  # 管理者通知エラーはユーザー送信に影響させない
+                    admin_result = send_admin_notification(user_input, result, pdf_path)
+                except Exception as e:
+                    admin_result = {"success": False, "message": f"Exception: {e}"}
+
+                # デバッグ：管理者通知の結果を画面に表示（ユーザー体験に影響しないよう小さく）
+                if admin_result and not admin_result.get('success'):
+                    st.caption(f"🔧 管理者通知デバッグ: {admin_result.get('message', '不明')}")
 
                 # ユーザーへのメール送信
-                result = send_pdf_email(email, user_input['name'], pdf_path)
-                if result['success']:
+                email_result = send_pdf_email(email, user_input['name'], pdf_path)
+                if email_result['success']:
                     st.success(f"""
 ✅ **{email} にメールを送信しました！**
 
@@ -225,9 +230,11 @@ if st.button("✨ あなたの人生開花タイプを診断する ✨", disable
 - 迷惑メールフォルダもチェックしてください
 - 5分待っても届かない場合は、メールアドレスを確認して再度診断してください
                     """)
+                    if admin_result and admin_result.get('success'):
+                        st.caption(f"📊 管理者通知も送信済み: {admin_result.get('message')}")
                     st.balloons()
                 else:
-                    st.error(f"❌ メール送信に失敗しました\n\n{result['message']}")
+                    st.error(f"❌ メール送信に失敗しました\n\n{email_result['message']}")
                     st.info("メールアドレスを確認して、もう一度診断してください。")
 
             # 一時ファイルを削除
