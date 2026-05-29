@@ -326,14 +326,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     story.append(Paragraph(love_text, styles['quote']))
     story.append(Spacer(1, 4*mm))
 
-    story.append(Paragraph("🤝 ビジネスパートナー相性", styles['h2']))
-    biz_text = (
-        f"<b>{mbti['type']}としての相性：</b><br/>{mbti.get('biz_match', '')}<br/><br/>"
-        f"<b>{wd['type']}としての相性：</b><br/>{wd.get('biz_match', '')}"
-    )
-    story.append(Paragraph(biz_text, styles['quote']))
-    story.append(Spacer(1, 4*mm))
-
     story.append(Paragraph("✨ 相性まとめ", styles['h2']))
     matching_summary = (
         f"あなたは<b>{mbti['type']}×{wd['type']}</b>の組み合わせ。<br/>"
