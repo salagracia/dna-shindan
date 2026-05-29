@@ -7,6 +7,7 @@
 """
 import os
 import base64
+from datetime import datetime
 
 
 def send_admin_notification(user_data: dict, result: dict, pdf_path: str) -> dict:
@@ -16,7 +17,8 @@ def send_admin_notification(user_data: dict, result: dict, pdf_path: str) -> dic
     """
     import resend
     api_key = os.environ.get('RESEND_API_KEY', '')
-    from_email = os.environ.get('FROM_EMAIL', 'monthly@salagracia.com')
+    # 管理者通知は確実に届けるため、検証済みドメインの from を優先
+    from_email = os.environ.get('ADMIN_FROM_EMAIL', os.environ.get('FROM_EMAIL', 'onboarding@resend.dev'))
     admin_email = os.environ.get('ADMIN_EMAIL', 'monthly@salagracia.com')
 
     if not api_key:
@@ -87,7 +89,6 @@ Gmail で「人生開花リスト」「{kaika.get('name', '')}」などで検索
 
     try:
         # PDF添付
-        import base64
         with open(pdf_path, 'rb') as f:
             pdf_b64 = base64.b64encode(f.read()).decode()
 
