@@ -21,38 +21,58 @@ from pdf_generator import generate_pdf
 
 
 def _build_personality(answers: dict) -> dict:
-    """人生開花タイプ診断（24問・4タイプ・サラグラシア独自）
-    メインタイプ + 隠れ才能タイプ を判定
-    PDF互換のため mbti=メイン、wd=隠れ才能として割り当て
-    """
+    """人生開花タイプ診断（24問・4タイプ）"""
     kaika = calculate_jinsei_kaika(answers)
 
-    # メインタイプ（PDF第2章で表示）
+    # メインタイプ（第2章）
     main_compat = {
         "type": kaika['type'],
         "label": kaika['name'],
         "subtitle": kaika['tagline'],
-        "summary": kaika['body'],
-        "strengths": [kaika['tagline']],
-        "weaknesses": ["あなたの才能を信じる勇気を持つこと"],
+        "summary": kaika['body'],  # 本文
+        "strengths": [
+            kaika['tagline'],
+            f"「{kaika['name']}」としての存在感そのもの",
+            "あなただけが持つ独自の感性",
+        ],
+        "weaknesses": ["自分の才能を信じる勇気を持つこと"],
         "relationships": f"あなたの隠れ才能タイプは「{kaika['second_name']}」（{kaika['second_tagline']}）。両方の才能を活かすと、人生がさらに深まります。",
-        "career": kaika['tagline'],
-        "challenge": f"本来のあなたを表現する場を意識的に作ること。",
+        "career": f"あなたの「{kaika['name']}」を最大限発揮できる仕事・活動を選びましょう。",
+        "challenge": f"日常の中で「{kaika['tagline']}」を発揮する場を意識的に作ること。",
         "love_match": f"隠れ才能「{kaika['second_name']}」と組み合わせると、関係性が深まります。",
         "biz_match": f"「{kaika['name']}」と「{kaika['second_name']}」の両方を活かせる場で輝きます。",
-        "fortune_strategy": kaika['body'],
+        # 運気戦略は本文と別の具体的アドバイス
+        "fortune_strategy": (
+            f"あなたの「{kaika['name']}」を活かす環境を、自分から選び取ること。"
+            f"「{kaika['tagline']}」を発揮できる場（発信・コミュニティ・新しい挑戦など）を持つことで、"
+            f"運気が一気に開けます。\n\n"
+            f"そして、隠れ才能「{kaika['second_name']}」を意識的に育てると、"
+            f"あなたの人生はさらに深く、豊かになっていきます。"
+        ),
         "body": kaika['body'],
     }
 
-    # 隠れ才能タイプ（PDF第3章で表示）
+    # 隠れ才能タイプ（第3章）
     second_compat = {
         "type": kaika['second_type'],
         "label": kaika['second_name'],
         "subtitle": kaika['second_tagline'],
-        "summary": kaika['second_body'],
-        "strengths": [kaika['second_tagline']],
-        "weaknesses": ["この才能を意識的に育てると、人生が一気に広がります"],
-        "fortune_strategy": kaika['second_body'],
+        "summary": kaika['second_body'],  # 隠れ才能の本文
+        "strengths": [
+            kaika['second_tagline'],
+            "メインタイプを支える内側の才能",
+            "意識すると一気に開花する可能性",
+        ],
+        "weaknesses": ["この才能はまだ眠っているかもしれません。日常で意識的に出す練習を"],
+        "fortune_strategy": (
+            f"隠れ才能「{kaika['second_name']}」は、あなたの中に確かに眠っています。\n\n"
+            f"普段はメインタイプ「{kaika['name']}」が前に出ますが、\n"
+            f"意識的に「{kaika['second_tagline']}」を発揮する場面を作ると、\n"
+            f"人生が驚くほど立体的になります。\n\n"
+            f"例えば、いつもと違う服装を選ぶ、苦手な人と話してみる、\n"
+            f"普段はやらない活動に飛び込んでみる——\n"
+            f"そういう小さな「いつもと違う」が、隠れた才能を呼び起こします。"
+        ),
         "body": kaika['second_body'],
         "biz_match": f"メインタイプ「{kaika['name']}」と組み合わせて発揮しましょう。",
         "love_match": f"メインタイプ「{kaika['name']}」と組み合わせて発揮しましょう。",
@@ -110,6 +130,7 @@ def run_diagnosis(user_input: dict) -> dict:
             user_input.get("last_name", user_input.get("name", "").split(" ")[0] if " " in user_input.get("name", "") else ""),
             user_input.get("first_name", user_input.get("name", "").split(" ")[-1] if " " in user_input.get("name", "") else user_input.get("name_kana", ""))
         ),
+        "narrative": user_input.get("narrative", {}),
     }
     return result
 

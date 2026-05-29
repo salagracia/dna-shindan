@@ -539,6 +539,54 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     story.append(PageBreak())
 
+    # ============== 自由記述章：あなたの言葉が映す本質 ==============
+    narrative = result.get('narrative', {})
+    n1 = (narrative.get('N1') or '').strip()
+    n2 = (narrative.get('N2') or '').strip()
+    if n1 or n2:
+        kaika_main = result.get('personality', {}).get('jinsei_kaika', {})
+        story.append(Paragraph("✍️ 第9章：あなたの言葉が映す本質", styles['h1']))
+        story.append(Spacer(1, 3*mm))
+        story.append(Paragraph(
+            "あなたが書いてくれた言葉から、内側の輝きを読み解きます。<br/>"
+            "占術データと心理タイプが「設計図」なら、ここに書かれた言葉は「あなたの魂の声」です。",
+            styles['quote']
+        ))
+        story.append(Spacer(1, 4*mm))
+
+        if n1:
+            story.append(Paragraph("📝 あなたの夢中体験", styles['h2']))
+            story.append(Paragraph(
+                f"<i>「{n1}」</i>",
+                styles['body']
+            ))
+            story.append(Spacer(1, 2*mm))
+            story.append(Paragraph(
+                f"<b>ここに見える「{kaika_main.get('name', 'あなた')}」の才能</b><br/>"
+                f"この体験の中で、あなたは時間を忘れて没頭しています。<br/>"
+                f"これこそ、あなたが本当の自分でいる瞬間。<br/>"
+                f"この時間が増えれば増えるほど、人生の輝きが増します。",
+                styles['tip']
+            ))
+            story.append(Spacer(1, 5*mm))
+
+        if n2:
+            story.append(Paragraph("📝 あなたの譲れない信念", styles['h2']))
+            story.append(Paragraph(
+                f"<i>「{n2}」</i>",
+                styles['body']
+            ))
+            story.append(Spacer(1, 2*mm))
+            story.append(Paragraph(
+                f"<b>ここに見える「価値観のコンパス」</b><br/>"
+                f"この信念は、あなたの人生の北極星です。<br/>"
+                f"迷った時、選択に悩んだ時、この言葉に立ち返ると、必ず本当の道が見えます。<br/>"
+                f"「{kaika_main.get('name', 'あなた')}」のタイプと組み合わせることで、揺るぎない人生軸ができます。",
+                styles['tip']
+            ))
+
+        story.append(PageBreak())
+
     # ============== Page 10: サラからの手紙 ==============
     story.append(Spacer(1, 15*mm))
     story.append(Paragraph("あなたへ — サラからの手紙", styles['title']))
