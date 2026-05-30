@@ -111,7 +111,9 @@ def make_styles():
                                  textColor=colors.HexColor('#8B4789'), spaceAfter=15),
         'h1': ParagraphStyle('H1JP', parent=styles['Heading1'], fontName=FONT_BOLD,
                               fontSize=16, leading=22, textColor=colors.HexColor('#8B4789'),
-                              spaceBefore=12, spaceAfter=8),
+                              spaceBefore=18, spaceAfter=6,
+                              borderPadding=4, borderColor=colors.HexColor('#8B4789'),
+                              borderWidth=0, leftIndent=0),
         'h2': ParagraphStyle('H2JP', parent=styles['Heading2'], fontName=FONT_BOLD,
                               fontSize=13, leading=18, textColor=colors.HexColor('#C0392B'),
                               spaceBefore=8, spaceAfter=4),
@@ -155,10 +157,10 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     story = []
 
     # ============== Page 1: 表紙 ==============
-    story.append(Spacer(1, 25*mm))
+    story.append(Spacer(1, 18*mm))
     story.append(Paragraph("人生開花タイプ診断レポート", styles['title']))
     story.append(Paragraph("人生再起動のための、あなた専用の設計図", styles['small']))
-    story.append(Spacer(1, 30*mm))
+    story.append(Spacer(1, 20*mm))
 
     user_info = [
         ['氏名', user_data['name']],
@@ -177,11 +179,11 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         ('TOPPADDING', (0, 0), (-1, -1), 8), ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
     ]))
     story.append(tbl)
-    story.append(Spacer(1, 25*mm))
+    story.append(Spacer(1, 14*mm))
     story.append(Paragraph(
         "東洋・西洋の占術と現代心理学を統合し、<br/>"
         "あなたという唯一無二の存在を立体的に描き出した、<br/>"
-        "<b>8ページの個人設計図</b>です。",
+        "<b>あなただけの個人設計図</b>です。",
         styles['body']
     ))
     story.append(PageBreak())
@@ -233,7 +235,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         ('WORDWRAP', (0, 0), (-1, -1), True),
     ]))
     story.append(tbl)
-    story.append(PageBreak())
 
     # ============== Page 3: 人生開花タイプ詳細（メイン） ==============
     mbti = result['personality']['mbti']
@@ -255,7 +256,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     story.append(Paragraph("🎯 あなたが取り組むといいチャレンジ", styles['h3']))
     story.append(Paragraph(mbti.get('challenge', ''), styles['tip']))
-    story.append(PageBreak())
 
     # ============== Page 4: 隠れ才能タイプ（第2位） ==============
     wd = result['personality']['wd']
@@ -272,7 +272,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     story.append(Paragraph("🌸 運気を上げる戦略", styles['h3']))
     story.append(Paragraph(wd.get('fortune_strategy', ''), styles['quote']))
-    story.append(PageBreak())
 
     # ============== Page 5: 総合診断・強みと使命 ==============
     story.append(Paragraph("第4章：総合診断 — あなたの強みと使命", styles['h1']))
@@ -312,7 +311,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         f"<b>自分の強みを過信せず、補完してくれる仲間と組む</b>ことが鍵です。"
     )
     story.append(Paragraph(pitfall_text, styles['body']))
-    story.append(PageBreak())
 
     # ============== Page 6: 相性診断 ==============
     story.append(Paragraph("第5章：相性診断 — 大切な人との関係", styles['h1']))
@@ -335,7 +333,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         f"ビジネスでは実務面の補完と相互尊重を意識してください。"
     )
     story.append(Paragraph(matching_summary, styles['body']))
-    story.append(PageBreak())
 
     # ============== Page 7: 運勢サイクル ==============
     fortune = result.get('fortune', {})
@@ -420,7 +417,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         f"その年までに種を蒔き、準備を整えておくと、人生最大の実りを得られます。"
     )
     story.append(Paragraph(strategy_text, styles['quote']))
-    story.append(PageBreak())
 
     # ============== 数秘ライフパス 深掘りページ ==============
     lp_deep = result.get('numerology', {}).get('life_path_deep', {})
@@ -441,7 +437,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
         story.append(Paragraph("🌸 50代以上のあなたへ", styles['h3']))
         story.append(Paragraph(lp_deep.get('for_50s', ''), styles['quote']))
-        story.append(PageBreak())
 
     # ============== Page 8: 姓名判断（新規追加） ==============
     seimei = result.get('seimei', {})
@@ -495,7 +490,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         sansai = seimei.get('sansai', {})
         story.append(Paragraph(f"🌳 三才配置：{sansai.get('combo', '')}", styles['h3']))
         story.append(Paragraph(sansai.get('meaning', ''), styles['body']))
-        story.append(PageBreak())
 
     # ============== Page 9: これからの行動指針 ==============
     story.append(Paragraph("第8章：これから1年の行動指針", styles['h1']))
@@ -528,8 +522,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         "占術データはあなたの「設計」を示すだけ。実際にそれを生きるのは、あなた自身です。</i>",
         styles['quote']
     ))
-
-    story.append(PageBreak())
 
     # ============== 自由記述章：あなたの言葉が映す本質 ==============
     narrative = result.get('narrative', {})
