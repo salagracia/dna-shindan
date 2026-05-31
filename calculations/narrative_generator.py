@@ -8,10 +8,35 @@
 
 
 def is_sara(user_data: dict) -> bool:
-    """ユーザーがサラさん本人かを判定（テスト用本文の出し分け）"""
-    kana = (user_data.get('name_kana') or '').replace(' ', '').replace('　', '')
-    name = (user_data.get('name') or '').replace(' ', '').replace('　', '')
-    return kana == 'ヤマオカサラ' or name == '山岡サラ'
+    """ユーザーがサラさん本人かを判定（テスト用本文の出し分け・表記揺れに広く対応）
+    判定条件（いずれかを満たせばサラ本人と判定）:
+      1. カタカナ「ヤマオカサラ」（半角・全角スペース・中点を除去後）
+      2. ひらがな「やまおかさら」
+      3. 漢字フル「山岡サラ」or「山岡 サラ」
+      4. 姓「山岡」+ 生年月日「1963-07-31」+ 出生地に「長崎」を含む
+         （表記揺れがあっても本人を取りこぼさないための最後の砦）
+    """
+    # 正規化（全角/半角スペース、中点、ハイフン、ドットを除去）
+    def _normalize(s: str) -> str:
+        for ch in (' ', '　', '・', '-', '.', '〜', '~'):
+            s = s.replace(ch, '')
+        return s.strip()
+
+    kana = _normalize(user_data.get('name_kana') or '')
+    name = _normalize(user_data.get('name') or '')
+    last_name = (user_data.get('last_name') or '').strip()
+    birth_date = user_data.get('birth_date', '')
+    birth_place = user_data.get('birth_place', '')
+
+    # パターン1-3: 名前ベースの判定（表記揺れ対応済み）
+    if kana in ('ヤマオカサラ', 'やまおかさら'):
+        return True
+    if name in ('山岡サラ', '山岡さら'):
+        return True
+    # パターン4: コンボ判定（姓＋生年月日＋出生地）
+    if last_name == '山岡' and birth_date == '1963-07-31' and '長崎' in birth_place:
+        return True
+    return False
 
 
 # ===========================================
