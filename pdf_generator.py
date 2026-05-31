@@ -676,9 +676,19 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph("🌸 50代以上のあなたへ", styles['h3']))
         story.append(Paragraph(lp_deep.get('for_50s', ''), styles['quote']))
 
-    # ============== Page 8: 姓名判断（新規追加） ==============
+    # ============== 第8章：名前に宿る、あなたへの祝福 ==============
+    from calculations.narrative_generator import get_chapter8_narrative
+    ch8 = get_chapter8_narrative(user_data, result)
     seimei = result.get('seimei', {})
-    if seimei:
+
+    if ch8:
+        # サラ専用：チャッピー深掘り版
+        story.append(Paragraph("第8章：名前に宿る、あなたへの祝福", styles['h1']))
+        for key in ['gift', 'five', 'essence', 'totality', 'calling']:
+            story.append(Paragraph(ch8[f'{key}_h2'], styles['h2']))
+            story.append(Paragraph(ch8[f'{key}_body'], styles['body']))
+            story.append(Spacer(1, 3*mm))
+    elif seimei:
         story.append(Paragraph("第8章：姓名判断 — 名前という、最初の贈り物", styles['h1']))
         story.append(Spacer(1, 3*mm))
 
