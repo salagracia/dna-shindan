@@ -618,24 +618,33 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     # ============== 第6章：大切な人との相性 ==============
     story.append(Paragraph("第6章：大切な人との相性", styles['h1']))
-    story.append(Spacer(1, 3*mm))
 
-    story.append(Paragraph("💖 恋愛・パートナーシップ相性", styles['h2']))
-    love_text = (
-        f"<b>{mbti['type']}としての相性：</b><br/>{mbti.get('love_match', '')}<br/><br/>"
-        f"<b>{wd['type']}としての相性：</b><br/>{wd.get('love_match', '')}"
-    )
-    story.append(Paragraph(love_text, styles['quote']))
-    story.append(Spacer(1, 4*mm))
+    from calculations.narrative_generator import get_chapter6_narrative
+    ch6 = get_chapter6_narrative(user_data, result)
+    if ch6:
+        for key in ['seeking', 'enabler', 'draining', 'quality', 'nurture']:
+            story.append(Paragraph(ch6[f'{key}_h2'], styles['h2']))
+            story.append(Paragraph(ch6[f'{key}_body'], styles['body']))
+            story.append(Spacer(1, 3*mm))
+    else:
+        # フォールバック（旧テンプレ）
+        story.append(Spacer(1, 3*mm))
+        story.append(Paragraph("💖 恋愛・パートナーシップ相性", styles['h2']))
+        love_text = (
+            f"<b>{mbti['type']}としての相性：</b><br/>{mbti.get('love_match', '')}<br/><br/>"
+            f"<b>{wd['type']}としての相性：</b><br/>{wd.get('love_match', '')}"
+        )
+        story.append(Paragraph(love_text, styles['quote']))
+        story.append(Spacer(1, 4*mm))
 
-    story.append(Paragraph("✨ 相性まとめ", styles['h2']))
-    matching_summary = (
-        f"あなたは<b>{mbti['type']}×{wd['type']}</b>の組み合わせ。<br/>"
-        f"パートナーには、あなたの<b>「{mbti.get('strengths', [''])[0]}」</b>を理解し、"
-        f"あなたが苦手な<b>「{mbti.get('weaknesses', [''])[0]}」</b>を補ってくれる人が最適です。<br/><br/>"
-        f"恋愛では深い理解と魂レベルのつながりを大切に。"
-    )
-    story.append(Paragraph(matching_summary, styles['body']))
+        story.append(Paragraph("✨ 相性まとめ", styles['h2']))
+        matching_summary = (
+            f"あなたは<b>{mbti['type']}×{wd['type']}</b>の組み合わせ。<br/>"
+            f"パートナーには、あなたの<b>「{mbti.get('strengths', [''])[0]}」</b>を理解し、"
+            f"あなたが苦手な<b>「{mbti.get('weaknesses', [''])[0]}」</b>を補ってくれる人が最適です。<br/><br/>"
+            f"恋愛では深い理解と魂レベルのつながりを大切に。"
+        )
+        story.append(Paragraph(matching_summary, styles['body']))
 
     # ============== 第7章：数秘ライフパス深掘り ==============
     lp_deep = result.get('numerology', {}).get('life_path_deep', {})
