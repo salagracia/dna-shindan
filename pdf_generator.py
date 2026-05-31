@@ -652,12 +652,26 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     lp_deep = result.get('numerology', {}).get('life_path_deep', {})
 
     if ch7:
-        # サラ専用：チャッピー深掘り版
+        # 本文（サラ専用 or 汎用テンプレ）＋ 数秘の具体解説
         story.append(Paragraph("第7章：数字に宿る、あなたの人生のテーマ", styles['h1']))
         for key in ['intro', 'essence', 'shadow', 'triple', 'mature']:
             story.append(Paragraph(ch7[f'{key}_h2'], styles['h2']))
             story.append(Paragraph(ch7[f'{key}_body'], styles['body']))
             story.append(Spacer(1, 3*mm))
+
+        # 数秘ライフパスの具体解説（計算結果由来の固有情報）
+        if lp_deep:
+            story.append(Paragraph(f"📖 ライフパス{n['life_path']['number']}の詳細：{lp_deep.get('title', '')}", styles['h3']))
+            story.append(Paragraph(lp_deep.get('essence', ''), styles['quote']))
+            story.append(Spacer(1, 2*mm))
+            story.append(Paragraph("💎 あなたの才能", styles['h3']))
+            story.append(Paragraph(lp_deep.get('talent', ''), styles['body']))
+            story.append(Paragraph("🌱 成長の余白（伸びしろ）", styles['h3']))
+            story.append(Paragraph(lp_deep.get('growth', ''), styles['body']))
+            story.append(Paragraph("🌟 魂の使命", styles['h3']))
+            story.append(Paragraph(lp_deep.get('mission', ''), styles['body']))
+            story.append(Paragraph("🌸 50代以上のあなたへ", styles['h3']))
+            story.append(Paragraph(lp_deep.get('for_50s', ''), styles['quote']))
     elif lp_deep:
         story.append(Paragraph(f"第7章：数秘ライフパス {n['life_path']['number']} — あなたの数の物語", styles['h1']))
         story.append(Paragraph(f"<b>{lp_deep.get('title', '')}</b>", styles['h2']))
@@ -682,12 +696,62 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     seimei = result.get('seimei', {})
 
     if ch8:
-        # サラ専用：チャッピー深掘り版
+        # 本文（サラ専用 or 汎用テンプレ）
         story.append(Paragraph("第8章：名前に宿る、あなたへの祝福", styles['h1']))
-        for key in ['gift', 'five', 'essence', 'totality', 'calling']:
+        # gift → five は本文だけ。その後で実際の五格テーブルを挿入。
+        for key in ['gift', 'five']:
             story.append(Paragraph(ch8[f'{key}_h2'], styles['h2']))
             story.append(Paragraph(ch8[f'{key}_body'], styles['body']))
             story.append(Spacer(1, 3*mm))
+
+        # 五格テーブル＋具体解説（計算結果は必ず表示する）
+        if seimei:
+            story.append(Paragraph("📜 あなたの五格（計算結果）", styles['h3']))
+            gokaku = seimei.get('gokaku', {})
+            gokaku_data = [
+                ['格', '画数', '数霊の名', '役割'],
+                ['天格', str(gokaku.get('tenkaku', 0)), seimei['tenkaku']['name'], '先祖から受け継ぐ運'],
+                ['人格 ★', str(gokaku.get('jinkaku', 0)), seimei['jinkaku']['name'], 'あなたの本質（主運）'],
+                ['地格', str(gokaku.get('chikaku', 0)), seimei['chikaku']['name'], '青年期までの基礎'],
+                ['外格', str(gokaku.get('gaikaku', 0)), seimei['gaikaku']['name'], '社会での印象'],
+                ['総格', str(gokaku.get('soukaku', 0)), seimei['soukaku']['name'], '人生全体の大運'],
+            ]
+            tbl = Table(gokaku_data, colWidths=[18*mm, 16*mm, 50*mm, 56*mm])
+            tbl.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, -1), FONT_REGULAR), ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('FONTNAME', (0, 0), (-1, 0), FONT_BOLD),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#8B4789')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#FBE9EC')),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#999999')),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ]))
+            story.append(tbl)
+            story.append(Spacer(1, 4*mm))
+
+        # essence（主運）→ totality（総格）の本文＋具体解説
+        story.append(Paragraph(ch8['essence_h2'], styles['h2']))
+        story.append(Paragraph(ch8['essence_body'], styles['body']))
+        if seimei:
+            story.append(Paragraph(f"⭐ あなたの主運：{seimei['jinkaku']['name']}（{seimei['jinkaku']['number']}画）", styles['h3']))
+            story.append(Paragraph(seimei['jinkaku']['description'], styles['body']))
+        story.append(Spacer(1, 3*mm))
+
+        story.append(Paragraph(ch8['totality_h2'], styles['h2']))
+        story.append(Paragraph(ch8['totality_body'], styles['body']))
+        if seimei:
+            story.append(Paragraph(f"🌸 人生全体の大運：{seimei['soukaku']['name']}（{seimei['soukaku']['number']}画）", styles['h3']))
+            story.append(Paragraph(seimei['soukaku']['description'], styles['body']))
+            sansai = seimei.get('sansai', {})
+            story.append(Paragraph(f"🌳 三才配置：{sansai.get('combo', '')}", styles['h3']))
+            story.append(Paragraph(sansai.get('meaning', ''), styles['body']))
+        story.append(Spacer(1, 3*mm))
+
+        # calling（締めくくり）
+        story.append(Paragraph(ch8['calling_h2'], styles['h2']))
+        story.append(Paragraph(ch8['calling_body'], styles['body']))
     elif seimei:
         story.append(Paragraph("第8章：姓名判断 — 名前という、最初の贈り物", styles['h1']))
         story.append(Spacer(1, 3*mm))
