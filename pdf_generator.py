@@ -719,11 +719,22 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph(f"🌳 三才配置：{sansai.get('combo', '')}", styles['h3']))
         story.append(Paragraph(sansai.get('meaning', ''), styles['body']))
 
-    # ============== 自由記述章：あなたの言葉が映す本質 ==============
+    # ============== 第9章：あなたの言葉が映す本質 ==============
+    from calculations.narrative_generator import get_chapter9_narrative
+    ch9 = get_chapter9_narrative(user_data, result)
     narrative = result.get('narrative', {})
     n1 = (narrative.get('N1') or '').strip()
     n2 = (narrative.get('N2') or '').strip()
-    if n1 or n2:
+
+    if ch9:
+        # サラ専用：深掘り版本文
+        story.append(Paragraph("第9章：あなたの言葉が映す本質", styles['h1']))
+        for key in ['opening', 'talent', 'value', 'future', 'integration']:
+            story.append(Paragraph(ch9[f'{key}_h2'], styles['h2']))
+            story.append(Paragraph(ch9[f'{key}_body'], styles['body']))
+            story.append(Spacer(1, 3*mm))
+    elif n1 or n2:
+        # フォールバック（旧テンプレ）：簡易版引用＋コメント
         kaika_main = result.get('personality', {}).get('jinsei_kaika', {})
         story.append(Paragraph("✍️ 第9章：あなたの言葉が映す本質", styles['h1']))
         story.append(Spacer(1, 3*mm))
