@@ -412,18 +412,29 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== Page 4: 隠れ才能タイプ（第2位） ==============
     wd = result['personality']['wd']
     story.append(Paragraph(f"第3章：あなたの隠れ才能タイプ", styles['h1']))
-    story.append(Paragraph(f"あなたのタイプ：<b>{wd['type']} — {wd.get('label', '')}</b>", styles['h2']))
-    story.append(Paragraph(f"戦略：{wd.get('subtitle', '')}", styles['h3']))
-    story.append(Paragraph(wd.get('summary', ''), styles['quote']))
 
-    story.append(Paragraph("💎 あなたの強み", styles['h3']))
-    story.append(bullet_list(wd.get('strengths', []), styles))
+    from calculations.narrative_generator import get_chapter3_narrative
+    ch3 = get_chapter3_narrative(user_data, result)
+    if ch3:
+        story.append(Paragraph(f"あなたのタイプ：<b>{wd['type']} — {wd.get('label', '')}</b>", styles['h2']))
+        for key in ['awakening', 'scene', 'overlap', 'practice', 'future']:
+            story.append(Paragraph(ch3[f'{key}_h2'], styles['h2']))
+            story.append(Paragraph(ch3[f'{key}_body'], styles['body']))
+            story.append(Spacer(1, 3*mm))
+    else:
+        # フォールバック（旧テンプレ）
+        story.append(Paragraph(f"あなたのタイプ：<b>{wd['type']} — {wd.get('label', '')}</b>", styles['h2']))
+        story.append(Paragraph(f"戦略：{wd.get('subtitle', '')}", styles['h3']))
+        story.append(Paragraph(wd.get('summary', ''), styles['quote']))
 
-    story.append(Paragraph("⚠️ 気をつけたい弱点", styles['h3']))
-    story.append(bullet_list(wd.get('weaknesses', []), styles))
+        story.append(Paragraph("💎 あなたの強み", styles['h3']))
+        story.append(bullet_list(wd.get('strengths', []), styles))
 
-    story.append(Paragraph("🌸 運気を上げる戦略", styles['h3']))
-    story.append(Paragraph(wd.get('fortune_strategy', ''), styles['quote']))
+        story.append(Paragraph("⚠️ 気をつけたい弱点", styles['h3']))
+        story.append(bullet_list(wd.get('weaknesses', []), styles))
+
+        story.append(Paragraph("🌸 運気を上げる戦略", styles['h3']))
+        story.append(Paragraph(wd.get('fortune_strategy', ''), styles['quote']))
 
     # ============== 第4章：人生の追い風とブレーキ ==============
     story.append(Paragraph("第4章：人生の追い風とブレーキ", styles['h1']))
