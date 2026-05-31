@@ -491,109 +491,130 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     fortune = result.get('fortune', {})
     fortune_3y = result.get('fortune_3years', [])
     tc_periods = result.get('tenchusatsu_years', {})
-
-    story.append(Paragraph("第5章：これからの開花シナリオ", styles['h1']))
-    story.append(Paragraph("運勢サイクルを味方に、1年後のあなたを描く", styles['body']))
-    story.append(Spacer(1, 3*mm))
-
-    story.append(Paragraph("🌙 あなたの天中殺", styles['h2']))
     tc = tc_periods.get('tenchusatsu', fortune.get('tenchusatsu_info', {}))
-    tc_text = (
-        f"<b>{tc.get('name', '')}</b>（日柱：{tc.get('day_kanshi', '')}）<br/>"
-        f"{tc.get('meaning', '')}"
-    )
-    story.append(Paragraph(tc_text, styles['quote']))
-    story.append(Spacer(1, 3*mm))
-
-    story.append(Paragraph("📅 あなたの天中殺の年（具体的時期）", styles['h3']))
     prev_p = tc_periods.get('previous_period')
     next_p = tc_periods.get('next_period')
     current_p = tc_periods.get('current_period')
 
-    if prev_p:
-        story.append(Paragraph(
-            f"<b>前回の天中殺：{prev_p[0]}年〜{prev_p[1]}年</b>　← この2年に大きな変化があったはず",
-            styles['body']
-        ))
-    if current_p:
-        story.append(Paragraph(
-            f"<b>現在の天中殺：{current_p[0]}年〜{current_p[1]}年</b>　← 今まさに天中殺中！",
-            styles['body']
-        ))
-    if next_p:
-        story.append(Paragraph(
-            f"<b>★ 次の天中殺：{next_p[0]}年〜{next_p[1]}年</b>　← 大きな決断はこの前までに完了させる",
-            styles['tip']
-        ))
+    story.append(Paragraph("第5章：これからの開花シナリオ", styles['h1']))
 
-    all_periods = tc_periods.get('all_periods', [])
-    if all_periods:
-        all_str = "、".join([f"{s}-{e}" if s != e else f"{s}" for s, e in all_periods[:6]])
-        story.append(Paragraph(f"<i>※ 全期間：{all_str}（12年周期で繰り返す）</i>", styles['small']))
+    from calculations.narrative_generator import get_chapter5_narrative
+    ch5 = get_chapter5_narrative(user_data, result)
+    if ch5:
+        for key in ['three_years', 'pause', 'actions', 'release', 'letter']:
+            story.append(Paragraph(ch5[f'{key}_h2'], styles['h2']))
+            # 「1年後のあなたへ」セクションだけquoteスタイルで温度感UP
+            body_style = styles['quote'] if key == 'letter' else styles['body']
+            story.append(Paragraph(ch5[f'{key}_body'], body_style))
+            story.append(Spacer(1, 3*mm))
+        # 補足：天中殺の具体的な年（実用情報）
+        story.append(Paragraph("📅 補足：あなたの「立ち止まる時期」の具体的な年", styles['h3']))
+        period_lines = []
+        if prev_p:
+            period_lines.append(f"前回：<b>{prev_p[0]}年〜{prev_p[1]}年</b>")
+        if current_p:
+            period_lines.append(f"現在：<b>{current_p[0]}年〜{current_p[1]}年</b>（今まさにこの時期）")
+        if next_p:
+            period_lines.append(f"次回：<b>{next_p[0]}年〜{next_p[1]}年</b>（大きな決断はこの前までに）")
+        story.append(Paragraph("<br/>".join(period_lines), styles['body']))
+    else:
+        # フォールバック（旧テンプレ）
+        story.append(Paragraph("運勢サイクルを味方に、1年後のあなたを描く", styles['body']))
+        story.append(Spacer(1, 3*mm))
+        story.append(Paragraph("🌙 あなたの天中殺", styles['h2']))
+        tc_text = (
+            f"<b>{tc.get('name', '')}</b>（日柱：{tc.get('day_kanshi', '')}）<br/>"
+            f"{tc.get('meaning', '')}"
+        )
+        story.append(Paragraph(tc_text, styles['quote']))
+        story.append(Spacer(1, 3*mm))
 
-    story.append(Spacer(1, 5*mm))
+        story.append(Paragraph("📅 あなたの天中殺の年（具体的時期）", styles['h3']))
 
-    story.append(Paragraph("🌸 これから3年のキーワード（毎年の運勢）", styles['h2']))
+        if prev_p:
+            story.append(Paragraph(
+                f"<b>前回の天中殺：{prev_p[0]}年〜{prev_p[1]}年</b>　← この2年に大きな変化があったはず",
+                styles['body']
+            ))
+        if current_p:
+            story.append(Paragraph(
+                f"<b>現在の天中殺：{current_p[0]}年〜{current_p[1]}年</b>　← 今まさに天中殺中！",
+                styles['body']
+            ))
+        if next_p:
+            story.append(Paragraph(
+                f"<b>★ 次の天中殺：{next_p[0]}年〜{next_p[1]}年</b>　← 大きな決断はこの前までに完了させる",
+                styles['tip']
+            ))
 
-    year_data = [['年', '十二支', 'キーワード', '解説', '天中殺']]
-    for f in fortune_3y:
-        is_tc = "⚠️天中殺" if f['is_tenchusatsu_year'] else "—"
-        year_data.append([
-            f"{f['target_year']}年",
-            f"{f['now_shi']}年",
-            f['keyword'],
-            f['description'],
-            is_tc
-        ])
+        all_periods = tc_periods.get('all_periods', [])
+        if all_periods:
+            all_str = "、".join([f"{s}-{e}" if s != e else f"{s}" for s, e in all_periods[:6]])
+            story.append(Paragraph(f"<i>※ 全期間：{all_str}（12年周期で繰り返す）</i>", styles['small']))
 
-    year_tbl = Table(year_data, colWidths=[18*mm, 16*mm, 22*mm, 80*mm, 24*mm])
-    year_tbl.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (-1, -1), FONT_REGULAR), ('FONTSIZE', (0, 0), (-1, -1), 8.5),
-        ('FONTNAME', (0, 0), (-1, 0), FONT_BOLD),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#8B4789')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (2, 1), (2, -1), FONT_BOLD),
-        ('TEXTCOLOR', (2, 1), (2, -1), colors.HexColor('#C0392B')),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#999999')),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-    ]))
-    story.append(year_tbl)
-    story.append(Spacer(1, 4*mm))
+        story.append(Spacer(1, 5*mm))
 
-    story.append(Paragraph("💡 戦略的ポイント", styles['h3']))
-    next_year_str = f"{next_p[0]}年" if next_p else "?"
-    strategy_text = (
-        f"あなたの次の天中殺は<b>{next_year_str}からの2年間</b>です。<br/>"
-        f"<b>それまでに大きな決断・拡大・新規挑戦を完了させる</b>のが運気活用の鉄則。<br/><br/>"
-        f"特に<b>12年サイクルの頂点「結実」の年</b>は最大の収穫期です。"
-        f"その年までに種を蒔き、準備を整えておくと、人生最大の実りを得られます。"
-    )
-    story.append(Paragraph(strategy_text, styles['quote']))
-    story.append(Spacer(1, 5*mm))
+        story.append(Paragraph("🌸 これから3年のキーワード（毎年の運勢）", styles['h2']))
 
-    # 第5章の最後に「1年の行動指針」をサブセクションとして統合
-    story.append(Paragraph("🌸 これから1年であなたが取るべき3つのアクション", styles['h2']))
-    actions = [
-        f"<b>1. 才能を開く</b>：{ws['sun']['name']}の輝きを活かした「{ws['sun']['theme'].split('・')[0]}」の場を1つ作る。",
-        f"<b>2. 仲間を結ぶ</b>：{result['shusei']['name']}の力を活かして、信頼できる仲間との対話を月1回以上持つ。",
-        f"<b>3. 強みを投下する</b>：{wd['type']}としての「{wd.get('strengths', [''])[0]}」を、新しい挑戦に投下する。",
-    ]
-    for a in actions:
-        story.append(Paragraph(a, styles['body']))
-        story.append(Spacer(1, 2*mm))
+        year_data = [['年', '十二支', 'キーワード', '解説', '天中殺']]
+        for f in fortune_3y:
+            is_tc = "⚠️天中殺" if f['is_tenchusatsu_year'] else "—"
+            year_data.append([
+                f"{f['target_year']}年",
+                f"{f['now_shi']}年",
+                f['keyword'],
+                f['description'],
+                is_tc
+            ])
 
-    story.append(Spacer(1, 4*mm))
-    story.append(Paragraph("⚠️ 今年避けるべきこと", styles['h2']))
-    avoid = [
-        f"<b>1. </b>{mbti.get('weaknesses', [''])[0]}に陥らないよう、自分のパターンを観察する。",
-        f"<b>2. </b>{wd.get('weaknesses', [''])[0]}は{wd['type']}の典型的な失敗パターン。仲間と補完する。",
-        f"<b>3. </b>天中殺の年（{'・'.join(tc.get('branches', []))}年）に大きな決断はしない。",
-    ]
-    for a in avoid:
-        story.append(Paragraph(a, styles['body']))
-        story.append(Spacer(1, 2*mm))
+        year_tbl = Table(year_data, colWidths=[18*mm, 16*mm, 22*mm, 80*mm, 24*mm])
+        year_tbl.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), FONT_REGULAR), ('FONTSIZE', (0, 0), (-1, -1), 8.5),
+            ('FONTNAME', (0, 0), (-1, 0), FONT_BOLD),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#8B4789')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (2, 1), (2, -1), FONT_BOLD),
+            ('TEXTCOLOR', (2, 1), (2, -1), colors.HexColor('#C0392B')),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#999999')),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 4),
+            ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ]))
+        story.append(year_tbl)
+        story.append(Spacer(1, 4*mm))
+
+        story.append(Paragraph("💡 戦略的ポイント", styles['h3']))
+        next_year_str = f"{next_p[0]}年" if next_p else "?"
+        strategy_text = (
+            f"あなたの次の天中殺は<b>{next_year_str}からの2年間</b>です。<br/>"
+            f"<b>それまでに大きな決断・拡大・新規挑戦を完了させる</b>のが運気活用の鉄則。<br/><br/>"
+            f"特に<b>12年サイクルの頂点「結実」の年</b>は最大の収穫期です。"
+            f"その年までに種を蒔き、準備を整えておくと、人生最大の実りを得られます。"
+        )
+        story.append(Paragraph(strategy_text, styles['quote']))
+        story.append(Spacer(1, 5*mm))
+
+        # 第5章の最後に「1年の行動指針」をサブセクションとして統合
+        story.append(Paragraph("🌸 これから1年であなたが取るべき3つのアクション", styles['h2']))
+        actions = [
+            f"<b>1. 才能を開く</b>：{ws['sun']['name']}の輝きを活かした「{ws['sun']['theme'].split('・')[0]}」の場を1つ作る。",
+            f"<b>2. 仲間を結ぶ</b>：{result['shusei']['name']}の力を活かして、信頼できる仲間との対話を月1回以上持つ。",
+            f"<b>3. 強みを投下する</b>：{wd['type']}としての「{wd.get('strengths', [''])[0]}」を、新しい挑戦に投下する。",
+        ]
+        for a in actions:
+            story.append(Paragraph(a, styles['body']))
+            story.append(Spacer(1, 2*mm))
+
+        story.append(Spacer(1, 4*mm))
+        story.append(Paragraph("⚠️ 今年避けるべきこと", styles['h2']))
+        avoid = [
+            f"<b>1. </b>{mbti.get('weaknesses', [''])[0]}に陥らないよう、自分のパターンを観察する。",
+            f"<b>2. </b>{wd.get('weaknesses', [''])[0]}は{wd['type']}の典型的な失敗パターン。仲間と補完する。",
+            f"<b>3. </b>天中殺の年（{'・'.join(tc.get('branches', []))}年）に大きな決断はしない。",
+        ]
+        for a in avoid:
+            story.append(Paragraph(a, styles['body']))
+            story.append(Spacer(1, 2*mm))
 
     # ============== 第6章：大切な人との相性 ==============
     story.append(Paragraph("第6章：大切な人との相性", styles['h1']))
