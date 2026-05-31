@@ -265,10 +265,13 @@ if st.button("✨ あなたの人生開花タイプを診断する ✨", disable
 
 
 st.divider()
-st.markdown("""
+# ビルドバージョン（デプロイ反映確認用）
+BUILD_VERSION = "v5.0 / 2026-05-31 deploy d5402a3"
+st.markdown(f"""
 <div style='text-align:center; color:#888; font-size:0.85em; margin-top:30px;'>
-    人生開花タイプ診断 v4.0<br>
+    人生開花タイプ診断 v5.0<br>
     監修：山岡サラ（サラグラシアアカデミー）<br>
-    『人生は、何度でも再起動できる』
+    『人生は、何度でも再起動できる』<br>
+    <span style='color:#bbb; font-size:0.8em;'>Build: {BUILD_VERSION}</span>
 </div>
 """, unsafe_allow_html=True)
