@@ -120,7 +120,8 @@ st.caption(f"📊 進捗：{answered} / {len(KAIKA_QUESTIONS)} 問")
 st.divider()
 st.subheader("✍️ Step 3：自由記述（必須・2問）")
 st.caption("あなたの言葉が、診断の深さを決めます。200字以上、書ける範囲で具体的にお願いします。")
-st.info("💡 この2問の回答から、あなたの **才能の指紋・落とし穴・価値観のコンパス** が浮かび上がります。")
+st.info("💡 この2問の回答から、あなたの **才能の指紋・落とし穴・価値観のコンパス** が浮かび上がります。\n\n"
+        "⚠️ **入力後、テキストボックスの外を一度クリックすると文字数が反映されます**（Streamlitの仕様です）。")
 
 narrative_answers = {}
 for n in NARRATIVE_QUESTIONS:
@@ -133,6 +134,16 @@ for n in NARRATIVE_QUESTIONS:
         placeholder="（200字以上を目安に、できるだけ具体的に）"
     )
     narrative_answers[n['id']] = ans
+    # 文字数カウンタ（入力済みの場合のみ）＋反映タイミングの説明
+    char_count = len((ans or '').strip())
+    if char_count == 0:
+        st.caption("📝 入力後、テキストボックスの外を一度クリックすると、文字数が反映されます")
+    elif char_count < 50:
+        st.caption(f"📝 現在 **{char_count}字** / 最低50字必要（入力後ボックス外をクリックで反映）")
+    elif char_count < 200:
+        st.caption(f"📝 現在 **{char_count}字** / 200字を目安にするとさらに深い診断になります")
+    else:
+        st.caption(f"✅ 現在 **{char_count}字** — 十分な分量です")
     st.markdown("")
 
 
@@ -154,7 +165,9 @@ if not input_valid:
     elif answered < 20:
         st.warning(f"⚠️ 質問にあと {20 - answered} 問は回答してください（最低20問必須・精度向上のため）。")
     elif not narrative_filled:
-        st.warning("⚠️ 自由記述2問にそれぞれ50字以上ご記入ください（あなたの言葉が診断の深さを決めます）。")
+        st.warning("⚠️ 自由記述2問にそれぞれ50字以上ご記入ください。\n\n"
+                   "💡 **入力済みなのにこの警告が出ている場合**：テキストボックスの外を一度クリックしてください。"
+                   "Streamlitの仕様で、ボックスからフォーカスが外れて初めて文字数が反映されます。")
 
 if st.button("✨ あなたの人生開花タイプを診断する ✨", disabled=not input_valid):
     with st.spinner("あなたの占術データと性格を計算中... 🔮"):
