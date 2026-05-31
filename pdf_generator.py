@@ -379,23 +379,35 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== Page 3: 人生開花タイプ詳細（メイン） ==============
     mbti = result['personality']['mbti']
     story.append(Paragraph(f"第2章：あなたの人生開花タイプ", styles['h1']))
-    story.append(Paragraph(f"あなたのタイプ：<b>{mbti['type']} — {mbti.get('label', '')}</b>", styles['h2']))
-    story.append(Paragraph(mbti.get('summary', ''), styles['quote']))
 
-    story.append(Paragraph("💪 あなたの強み", styles['h3']))
-    story.append(bullet_list(mbti.get('strengths', []), styles))
+    # narrative_generatorから本文取得（サラ専用テスト本文／Phase2でAPI生成）
+    from calculations.narrative_generator import get_chapter2_narrative
+    ch2 = get_chapter2_narrative(user_data, result)
+    if ch2:
+        story.append(Paragraph(f"あなたのタイプ：<b>{mbti['type']} — {mbti.get('label', '')}</b>", styles['h2']))
+        for key in ['talent', 'scene', 'past', 'bloom', 'future']:
+            story.append(Paragraph(ch2[f'{key}_h2'], styles['h2']))
+            story.append(Paragraph(ch2[f'{key}_body'], styles['body']))
+            story.append(Spacer(1, 3*mm))
+    else:
+        # フォールバック（旧テンプレ）
+        story.append(Paragraph(f"あなたのタイプ：<b>{mbti['type']} — {mbti.get('label', '')}</b>", styles['h2']))
+        story.append(Paragraph(mbti.get('summary', ''), styles['quote']))
 
-    story.append(Paragraph("⚠️ 気をつけたい弱点", styles['h3']))
-    story.append(bullet_list(mbti.get('weaknesses', []), styles))
+        story.append(Paragraph("💪 あなたの強み", styles['h3']))
+        story.append(bullet_list(mbti.get('strengths', []), styles))
 
-    story.append(Paragraph("💖 人間関係の特徴", styles['h3']))
-    story.append(Paragraph(mbti.get('relationships', ''), styles['body']))
+        story.append(Paragraph("⚠️ 気をつけたい弱点", styles['h3']))
+        story.append(bullet_list(mbti.get('weaknesses', []), styles))
 
-    story.append(Paragraph("💼 適職・キャリア", styles['h3']))
-    story.append(Paragraph(mbti.get('career', ''), styles['body']))
+        story.append(Paragraph("💖 人間関係の特徴", styles['h3']))
+        story.append(Paragraph(mbti.get('relationships', ''), styles['body']))
 
-    story.append(Paragraph("🎯 あなたが取り組むといいチャレンジ", styles['h3']))
-    story.append(Paragraph(mbti.get('challenge', ''), styles['tip']))
+        story.append(Paragraph("💼 適職・キャリア", styles['h3']))
+        story.append(Paragraph(mbti.get('career', ''), styles['body']))
+
+        story.append(Paragraph("🎯 あなたが取り組むといいチャレンジ", styles['h3']))
+        story.append(Paragraph(mbti.get('challenge', ''), styles['tip']))
 
     # ============== Page 4: 隠れ才能タイプ（第2位） ==============
     wd = result['personality']['wd']
