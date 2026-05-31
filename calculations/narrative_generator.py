@@ -1,10 +1,168 @@
 """
 章本文の生成モジュール（v5 深掘り版）
-- Phase 1（現在）: サラ・グラシア監修の「お手本テキスト」を埋め込み
-  → サラさん自身のデータで動かした時のみ第1章本文を返す
-- Phase 2（月曜以降）: Claude API で各ユーザーの占術データから動的生成
-  → このファイルに API 呼び出しを追加するだけで切り替えられる構造
+Phase 1: サラ本人のデータ → 固定本文（高速・お手本）
+Phase 2: 他のユーザー → Claude API で動的生成
+Phase 3 (最終フォールバック): API失敗時 → 既存の旧テンプレ（PDF側で処理）
 """
+import os
+import json
+import hashlib
+import tempfile
+
+
+def _build_user_context(user_data: dict, result: dict) -> str:
+    """Claude APIに渡すユーザーデータのコンテキスト文字列を構築"""
+    ws = result.get('western_astrology', {})
+    n = result.get('numerology', {})
+    kaika = result.get('personality', {}).get('jinsei_kaika', {})
+    sp = result.get('shichuusuimei', {})
+    seimei = result.get('seimei', {})
+    narrative = user_data.get('narrative', {}) or result.get('narrative', {})
+    tc = result.get('tenchusatsu_years', {})
+
+    n1 = (narrative.get('N1') or '').strip()
+    n2 = (narrative.get('N2') or '').strip()
+    first_name = user_data.get('first_name', '') or user_data.get('name', '').split(' ')[-1]
+
+    return f"""
+このユーザーのために、章本文を生成してください。
+ユーザーの呼びかけは「{first_name}さん」または「あなた」で。
+
+【ユーザー基本情報】
+- 氏名: {user_data.get('name', '')}
+- 生年月日: {user_data.get('birth_date', '')}
+- 出生時間: {user_data.get('birth_time', '')}
+- 出生地: {user_data.get('birth_place', '')}
+
+【占術データ（本文中に占術名は出さないこと）】
+- 太陽星座: {ws.get('sun', {}).get('name', '')}（{ws.get('sun', {}).get('theme', '')}）
+- 月星座: {ws.get('moon', {}).get('name', '')}
+- アセンダント: {ws.get('asc', {}).get('name', '')}
+- 数秘ライフパス: {n.get('life_path', {}).get('number', '')}（{n.get('life_path', {}).get('meaning', '')}）
+- 誕生数: {n.get('birth_day', {}).get('number', '')}
+- 運命数: {n.get('destiny', {}).get('number', '')}
+- 日柱: {sp.get('day', {}).get('kanshi', '')}
+- 本命星: {result.get('kyusei', {}).get('honmei', {}).get('name', '')}
+- 算命学主星: {result.get('shusei', {}).get('name', '')}（{result.get('shusei', {}).get('meaning', '')}）
+- 動物キャラ: {result.get('doubutsu', {}).get('name_60', '')}（{result.get('doubutsu', {}).get('meaning', '')}）
+- 帝王学: {result.get('teiou', {}).get('name', '')}
+
+【人生開花タイプ判定】
+- メインタイプ: {kaika.get('name', '')}（{kaika.get('tagline', '')}）
+- メインタイプの本文: {kaika.get('body', '')}
+- 隠れ才能タイプ: {kaika.get('second_name', '')}（{kaika.get('second_tagline', '')}）
+
+【姓名判断】
+- 天格: {seimei.get('tenkaku', {}).get('number', '')}（{seimei.get('tenkaku', {}).get('name', '')}）
+- 人格: {seimei.get('jinkaku', {}).get('number', '')}（{seimei.get('jinkaku', {}).get('name', '')}）
+- 総格: {seimei.get('soukaku', {}).get('number', '')}（{seimei.get('soukaku', {}).get('name', '')}）
+
+【天中殺】
+- {tc.get('tenchusatsu', {}).get('name', '')}
+- 次の天中殺: {tc.get('next_period', ['', ''])[0] if tc.get('next_period') else '?'}年〜
+
+【ユーザー自身の言葉】
+- 夢中体験（N1）: 「{n1[:500] if n1 else '（未記入）'}」
+- 譲れない信念（N2）: 「{n2[:500] if n2 else '（未記入）'}」
+""".strip()
+
+
+def _user_cache_key(user_data: dict, chapter_num: int) -> str:
+    """ユーザーデータ＋章番号からキャッシュキーを生成"""
+    key_str = f"{user_data.get('name', '')}|{user_data.get('birth_date', '')}|{user_data.get('birth_time', '')}|{user_data.get('birth_place', '')}|{chapter_num}"
+    return hashlib.md5(key_str.encode('utf-8')).hexdigest()
+
+
+def _get_cache_path(cache_key: str) -> str:
+    """キャッシュファイルのパス"""
+    cache_dir = os.path.join(tempfile.gettempdir(), 'dna_shindan_cache')
+    os.makedirs(cache_dir, exist_ok=True)
+    return os.path.join(cache_dir, f"{cache_key}.json")
+
+
+def _call_claude_api(chapter_num: int, user_data: dict, result: dict) -> dict | None:
+    """Claude APIで章本文を動的生成（キャッシュあり）
+    成功時: 章本文のdict（body部分のみ）
+    失敗時: None
+    """
+    api_key = os.environ.get('ANTHROPIC_API_KEY', '').strip()
+    if not api_key:
+        print(f"[Claude API] ANTHROPIC_API_KEY未設定 chapter={chapter_num}")
+        return None
+
+    # キャッシュ確認
+    cache_key = _user_cache_key(user_data, chapter_num)
+    cache_path = _get_cache_path(cache_key)
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                cached = json.load(f)
+            print(f"[Claude API] cache hit chapter={chapter_num}")
+            return cached
+        except Exception:
+            pass
+
+    try:
+        from anthropic import Anthropic
+        from calculations.claude_prompts import CHAPTER_PROMPTS
+
+        system_prompt = CHAPTER_PROMPTS.get(chapter_num)
+        if not system_prompt:
+            return None
+
+        client = Anthropic(api_key=api_key)
+        user_context = _build_user_context(user_data, result)
+
+        response = client.messages.create(
+            model="claude-sonnet-4-5-20250929",
+            max_tokens=4096,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_context}],
+        )
+
+        text = response.content[0].text.strip()
+        # ```json マークが含まれていれば除去
+        if text.startswith('```'):
+            text = text.split('```')[1]
+            if text.startswith('json'):
+                text = text[4:]
+            text = text.strip().rstrip('`').strip()
+
+        parsed = json.loads(text)
+
+        # キャッシュ保存
+        try:
+            with open(cache_path, 'w', encoding='utf-8') as f:
+                json.dump(parsed, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+        print(f"[Claude API] generated chapter={chapter_num}")
+        return parsed
+
+    except Exception as e:
+        print(f"[Claude API] error chapter={chapter_num}: {type(e).__name__}: {e}")
+        return None
+
+
+def _build_chapter_dict(chapter_num: int, body_dict: dict) -> dict:
+    """body_dictにh2見出しを追加して、PDF生成用の完全なdictを返す"""
+    from calculations.claude_prompts import CHAPTER_HEADINGS
+    headings = CHAPTER_HEADINGS.get(chapter_num, {})
+    result = {}
+    for h2_key, h2_value in headings.items():
+        result[h2_key] = h2_value
+        body_key = h2_key.replace('_h2', '_body')
+        result[body_key] = body_dict.get(body_key, '（本文生成中...）')
+    return result
+
+
+def _try_claude(chapter_num: int, user_data: dict, result: dict) -> dict | None:
+    """Claude APIを試して、成功したら章dictを返す。失敗時はNone（フォールバック発動）"""
+    body_dict = _call_claude_api(chapter_num, user_data, result)
+    if body_dict:
+        return _build_chapter_dict(chapter_num, body_dict)
+    return None
 
 
 def is_sara(user_data: dict) -> bool:
@@ -266,7 +424,7 @@ def get_chapter2_narrative(user_data: dict, result: dict) -> dict | None:
             'future_h2': 'メインタイプとして、これから大切にしたいこと',
             'future_body': SARA_CHAPTER_2_FUTURE,
         }
-    return None
+    return _try_claude(2, user_data, result)
 
 
 # ===========================================
@@ -394,7 +552,7 @@ def get_chapter3_narrative(user_data: dict, result: dict) -> dict | None:
             'future_h2': '両方を活かしたあなたの人生',
             'future_body': SARA_CHAPTER_3_FUTURE,
         }
-    return None
+    return _try_claude(3, user_data, result)
 
 
 # ===========================================
@@ -536,7 +694,7 @@ def get_chapter4_narrative(user_data: dict, result: dict) -> dict | None:
             'mantra_h2': 'あなた専用の呪文',
             'mantra_body': SARA_CHAPTER_4_MANTRA,
         }
-    return None
+    return _try_claude(4, user_data, result)
 
 
 # ===========================================
@@ -679,7 +837,7 @@ def get_chapter5_narrative(user_data: dict, result: dict) -> dict | None:
             'letter_h2': '1年後のあなたへ',
             'letter_body': SARA_CHAPTER_5_LETTER,
         }
-    return None
+    return _try_claude(5, user_data, result)
 
 
 # ===========================================
@@ -826,7 +984,7 @@ def get_chapter6_narrative(user_data: dict, result: dict) -> dict | None:
             'nurture_h2': '家族・パートナー・仲間との関係を、どう育てるか',
             'nurture_body': SARA_CHAPTER_6_NURTURE,
         }
-    return None
+    return _try_claude(6, user_data, result)
 
 
 # ===========================================
@@ -994,7 +1152,7 @@ def get_chapter9_narrative(user_data: dict, result: dict) -> dict | None:
             'integration_h2': 'これからのあなたへ',
             'integration_body': SARA_CHAPTER_9_INTEGRATION,
         }
-    return None
+    return _try_claude(9, user_data, result)
 
 
 # ===========================================
@@ -1132,7 +1290,7 @@ def get_chapter7_narrative(user_data: dict, result: dict) -> dict | None:
             'mature_h2': '50代以降、ライフパス3がさらに輝く時期',
             'mature_body': SARA_CHAPTER_7_MATURE,
         }
-    return None
+    return _try_claude(7, user_data, result)
 
 
 # ===========================================
@@ -1291,7 +1449,7 @@ def get_chapter8_narrative(user_data: dict, result: dict) -> dict | None:
             'calling_h2': 'あなたの名前があなたを呼ぶ時',
             'calling_body': SARA_CHAPTER_8_CALLING,
         }
-    return None
+    return _try_claude(8, user_data, result)
 
 
 def get_chapter1_narrative(user_data: dict, result: dict) -> dict | None:
@@ -1324,5 +1482,5 @@ def get_chapter1_narrative(user_data: dict, result: dict) -> dict | None:
             'shine_h2': '本来のあなたが輝く時',
             'shine_body': SARA_CHAPTER_1_SHINE,
         }
-    # Phase 2 でここに Claude API 呼び出しを追加予定
-    return None
+    # サラ本人以外 → Claude APIで動的生成（APIキーなければNone）
+    return _try_claude(1, user_data, result)

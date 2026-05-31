@@ -7,3 +7,4 @@ pdfplumber
 lunar-python
 skyfield
 resend
+anthropic>=0.40.0
