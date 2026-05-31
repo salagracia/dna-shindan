@@ -62,12 +62,13 @@ st.subheader("👤 Step 1：基本情報")
 col1, col2 = st.columns(2)
 with col1:
     last_name = st.text_input("姓（漢字）", placeholder="山岡")
-    first_name = st.text_input("名（漢字）", placeholder="サラ")
 with col2:
-    name_kana = st.text_input("お名前（カタカナ・スペースなしで入力）",
-                              placeholder="ヤマオカサラ",
-                              help="姓と名の間にスペースを入れず、続けてご入力ください（例：ヤマオカサラ）")
-    email = st.text_input("📧 メールアドレス（必須・診断結果のPDFをお送りします）", placeholder="your@email.com")
+    first_name = st.text_input("名（漢字）", placeholder="サラ")
+
+name_kana = st.text_input("お名前（カタカナ・スペースなしで入力）",
+                          placeholder="ヤマオカサラ",
+                          help="姓と名の間にスペースを入れず、続けてご入力ください（例：ヤマオカサラ）")
+email = st.text_input("📧 メールアドレス（必須・診断結果のPDFをお送りします）", placeholder="your@email.com")
 
 col3, col4, col5 = st.columns([2, 1, 2])
 with col3:
