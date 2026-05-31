@@ -438,43 +438,54 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     # ============== 第4章：人生の追い風とブレーキ ==============
     story.append(Paragraph("第4章：人生の追い風とブレーキ", styles['h1']))
-    story.append(Paragraph("あなたの中で働く2つの力——あなたを前に進ませるものと、立ち止まらせるもの", styles['body']))
-    story.append(Spacer(1, 3*mm))
 
-    story.append(Paragraph("📌 占術が示すあなたの才能の核", styles['h2']))
-    talent_text = (
-        f"{ws['sun']['name']}の太陽が示す「{ws['sun']['theme']}」、"
-        f"そして「{n['life_path']['meaning'].split('。')[0]}」というライフパスが、"
-        f"あなたの才能の中心軸を形作っています。<br/><br/>"
-        f"{result['shusei']['name']}（算命学）と{ky['honmei']['name']}（九星気学）の組み合わせは、"
-        f"<b>「{result['shusei']['meaning'].split('。')[0]}」</b>という資質を裏付けています。"
-        f"動物キャラ「{result['doubutsu'].get('name_60', '')}」の特徴である"
-        f"「{result['doubutsu']['meaning'].split('。')[0]}」も加わり、"
-        f"独自の輝きを放つ人物像が浮かび上がります。"
-    )
-    story.append(Paragraph(talent_text, styles['body']))
-    story.append(Spacer(1, 4*mm))
+    from calculations.narrative_generator import get_chapter4_narrative
+    ch4 = get_chapter4_narrative(user_data, result)
+    if ch4:
+        for key in ['tailwind', 'overflow', 'brake', 'ally', 'mantra']:
+            story.append(Paragraph(ch4[f'{key}_h2'], styles['h2']))
+            # 「あなた専用の呪文」セクションだけ quote スタイルで強調
+            body_style = styles['quote'] if key == 'mantra' else styles['body']
+            story.append(Paragraph(ch4[f'{key}_body'], body_style))
+            story.append(Spacer(1, 3*mm))
+    else:
+        story.append(Paragraph("あなたの中で働く2つの力——あなたを前に進ませるものと、立ち止まらせるもの", styles['body']))
+        story.append(Spacer(1, 3*mm))
 
-    story.append(Paragraph("🎯 あなたの使命の方向", styles['h2']))
-    mission_text = (
-        f"{result['teiou']['name']}（帝王学）のあり方が示す通り、"
-        f"あなたの使命は<b>「{result['teiou']['meaning']}」</b>という方向にあります。<br/><br/>"
-        f"{mbti['type']}としての「{mbti.get('summary', '').split('。')[0]}」を発揮しながら、"
-        f"{wd['type']}（{wd.get('label', '')}）として"
-        f"「{wd.get('summary', '').split('。')[0]}」を実践することが、"
-        f"最も自然な人生の歩み方です。"
-    )
-    story.append(Paragraph(mission_text, styles['body']))
-    story.append(Spacer(1, 4*mm))
+        story.append(Paragraph("📌 占術が示すあなたの才能の核", styles['h2']))
+        talent_text = (
+            f"{ws['sun']['name']}の太陽が示す「{ws['sun']['theme']}」、"
+            f"そして「{n['life_path']['meaning'].split('。')[0]}」というライフパスが、"
+            f"あなたの才能の中心軸を形作っています。<br/><br/>"
+            f"{result['shusei']['name']}（算命学）と{ky['honmei']['name']}（九星気学）の組み合わせは、"
+            f"<b>「{result['shusei']['meaning'].split('。')[0]}」</b>という資質を裏付けています。"
+            f"動物キャラ「{result['doubutsu'].get('name_60', '')}」の特徴である"
+            f"「{result['doubutsu']['meaning'].split('。')[0]}」も加わり、"
+            f"独自の輝きを放つ人物像が浮かび上がります。"
+        )
+        story.append(Paragraph(talent_text, styles['body']))
+        story.append(Spacer(1, 4*mm))
 
-    story.append(Paragraph("⚠️ あなたが気をつけるべき落とし穴", styles['h2']))
-    pitfall_text = (
-        f"あなたの最大の強み「{mbti.get('strengths', [''])[0]}」は、"
-        f"そのまま最大の弱点「{mbti.get('weaknesses', [''])[0]}」と裏表です。<br/><br/>"
-        f"{wd['type']}タイプの典型的な落とし穴である「{wd.get('weaknesses', [''])[0]}」も意識し、"
-        f"<b>自分の強みを過信せず、補完してくれる仲間と組む</b>ことが鍵です。"
-    )
-    story.append(Paragraph(pitfall_text, styles['body']))
+        story.append(Paragraph("🎯 あなたの使命の方向", styles['h2']))
+        mission_text = (
+            f"{result['teiou']['name']}（帝王学）のあり方が示す通り、"
+            f"あなたの使命は<b>「{result['teiou']['meaning']}」</b>という方向にあります。<br/><br/>"
+            f"{mbti['type']}としての「{mbti.get('summary', '').split('。')[0]}」を発揮しながら、"
+            f"{wd['type']}（{wd.get('label', '')}）として"
+            f"「{wd.get('summary', '').split('。')[0]}」を実践することが、"
+            f"最も自然な人生の歩み方です。"
+        )
+        story.append(Paragraph(mission_text, styles['body']))
+        story.append(Spacer(1, 4*mm))
+
+        story.append(Paragraph("⚠️ あなたが気をつけるべき落とし穴", styles['h2']))
+        pitfall_text = (
+            f"あなたの最大の強み「{mbti.get('strengths', [''])[0]}」は、"
+            f"そのまま最大の弱点「{mbti.get('weaknesses', [''])[0]}」と裏表です。<br/><br/>"
+            f"{wd['type']}タイプの典型的な落とし穴である「{wd.get('weaknesses', [''])[0]}」も意識し、"
+            f"<b>自分の強みを過信せず、補完してくれる仲間と組む</b>ことが鍵です。"
+        )
+        story.append(Paragraph(pitfall_text, styles['body']))
 
     # ============== 第5章：これからの開花シナリオ ==============
     fortune = result.get('fortune', {})
