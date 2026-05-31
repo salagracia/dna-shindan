@@ -646,9 +646,19 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         )
         story.append(Paragraph(matching_summary, styles['body']))
 
-    # ============== 第7章：数秘ライフパス深掘り ==============
+    # ============== 第7章：数字に宿る、あなたの人生のテーマ ==============
+    from calculations.narrative_generator import get_chapter7_narrative
+    ch7 = get_chapter7_narrative(user_data, result)
     lp_deep = result.get('numerology', {}).get('life_path_deep', {})
-    if lp_deep:
+
+    if ch7:
+        # サラ専用：チャッピー深掘り版
+        story.append(Paragraph("第7章：数字に宿る、あなたの人生のテーマ", styles['h1']))
+        for key in ['intro', 'essence', 'shadow', 'triple', 'mature']:
+            story.append(Paragraph(ch7[f'{key}_h2'], styles['h2']))
+            story.append(Paragraph(ch7[f'{key}_body'], styles['body']))
+            story.append(Spacer(1, 3*mm))
+    elif lp_deep:
         story.append(Paragraph(f"第7章：数秘ライフパス {n['life_path']['number']} — あなたの数の物語", styles['h1']))
         story.append(Paragraph(f"<b>{lp_deep.get('title', '')}</b>", styles['h2']))
         story.append(Paragraph(lp_deep.get('essence', ''), styles['quote']))
