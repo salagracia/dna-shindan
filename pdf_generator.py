@@ -361,6 +361,21 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     ]))
     story.append(tbl)
 
+    # 第1章 本文（narrative_generatorから取得・サラ専用テスト本文／Phase2でAPI生成）
+    from calculations.narrative_generator import get_chapter1_narrative
+    ch1 = get_chapter1_narrative(user_data, result)
+    if ch1:
+        story.append(Spacer(1, 6*mm))
+        for key in ['intro', 'theme', 'impression', 'conflict', 'shine']:
+            story.append(Paragraph(ch1[f'{key}_h2'], styles['h2']))
+            story.append(Paragraph(ch1[f'{key}_body'], styles['body']))
+            story.append(Spacer(1, 3*mm))
+        story.append(Paragraph(
+            "<i>このあと続く章では、その資質がどのような才能として現れ、<br/>"
+            "どのように人生の追い風へと変わっていくのかを見ていきましょう。</i>",
+            styles['quote']
+        ))
+
     # ============== Page 3: 人生開花タイプ詳細（メイン） ==============
     mbti = result['personality']['mbti']
     story.append(Paragraph(f"第2章：あなたの人生開花タイプ", styles['h1']))
