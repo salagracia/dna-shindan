@@ -143,6 +143,126 @@ def bullet_list(items, styles):
     )
 
 
+def build_prologue(user_data: dict, result: dict, styles) -> list:
+    """序章：あなたという奇跡
+    山岡サラ監修・希望のトーンで、占術データを「数千〜数万人に1人」の希少性として提示。
+    """
+    elements = []
+    name = user_data.get('first_name') or user_data.get('name', '').split(' ')[-1]
+    birth_place = user_data.get('birth_place', '—')
+    birth_time = user_data.get('birth_time', '—')
+    ws = result.get('western_astrology', {})
+    sun_sign = ws.get('sun', {}).get('name', '—')
+    moon_sign = ws.get('moon', {}).get('name', '—')
+    asc = ws.get('asc', {}).get('name', '—')
+    kaika = result.get('personality', {}).get('jinsei_kaika', {})
+    main_type = kaika.get('name', '—')
+    main_tag = kaika.get('tagline', '')
+    second_type = kaika.get('second_name', '—')
+    second_tag = kaika.get('second_tagline', '')
+
+    elements.append(Paragraph("序章　あなたという奇跡", styles['h1']))
+
+    # 段落リスト：すべて body スタイル、一行ずつの改行リズムを <br/> で表現
+    intro = (
+        f"{name}さん。<br/><br/>"
+        f"今、あなたはこのレポートをどんな気持ちで開いているでしょうか。<br/>"
+        f"自分のことをもっと知りたい。<br/>"
+        f"これからの人生をより豊かに生きたい。<br/>"
+        f"あるいは、心のどこかで「私は本当は何者なのだろう」と感じているのかもしれません。<br/><br/>"
+        f"このレポートは、そんな問いに対して一つの視点を提供するために作られました。<br/><br/>"
+        f"まず最初にお伝えしたいことがあります。<br/>"
+        f"それは、<b>「あなたは極めて希少な存在である」</b>という事実です。"
+    )
+    elements.append(Paragraph(intro, styles['body']))
+    elements.append(Spacer(1, 4*mm))
+
+    moment = (
+        f"{name}さんが生まれたその瞬間。<br/>"
+        f"<b>{birth_place}</b>の空の下で、<b>{birth_time}</b>という時刻に一つの命が誕生しました。<br/><br/>"
+        f"その時、太陽は<b>{sun_sign}</b>にあり、<br/>"
+        f"月は<b>{moon_sign}</b>を巡り、<br/>"
+        f"地平線には<b>{asc}</b>が昇っていました。<br/><br/>"
+        f"世界では同じ日にも多くの命が生まれていましたが、<br/>"
+        f"まったく同じ条件で生まれた人は存在しません。<br/><br/>"
+        f"私たちは普段、自分を「普通の一人」と考えがちです。<br/>"
+        f"しかし数字で見てみると、まったく違う景色が見えてきます。"
+    )
+    elements.append(Paragraph(moment, styles['body']))
+    elements.append(Spacer(1, 4*mm))
+
+    # 希少性の数字証明（quoteスタイルで強調）
+    rarity = (
+        "太陽星座は12種類。月星座も12種類。<br/>"
+        "数秘ライフパスは9種類。干支の組み合わせは60種類。<br/><br/>"
+        "これだけでも、<b>12 × 12 × 9 × 60 ＝ 77,760通り</b>。<br/>"
+        "さらに出生時刻と出生地を加味すると、<b>およそ93万通り以上</b>の組み合わせになります。<br/><br/>"
+        "地球人口を約80億人とすると、<b>80億 ÷ 93万 ＝ 約8,600人</b>。<br/><br/>"
+        f"つまり、{name}さんと同じ組み合わせを持つ人は、<br/>"
+        "統計上およそ<b>8,600人に1人</b>程度。<br/><br/>"
+        "そして実際には、育った環境、出会った人、経験してきた出来事まで含めれば、<br/>"
+        "<b>まったく同じ人生を歩んだ人は一人も存在しません</b>。<br/><br/>"
+        "これは占いの話ではありません。<br/>"
+        "単純な組み合わせの計算から見ても、あなたが希少な存在であることを示す数字です。"
+    )
+    elements.append(Paragraph(rarity, styles['quote']))
+    elements.append(Spacer(1, 4*mm))
+
+    # 3つの層
+    layers = (
+        "このレポートでは、そんなあなたを<b>「3つの層」</b>から立体的に見ていきます。<br/><br/>"
+        "<b>第一の層</b>は、生まれ持った傾向や資質を読み解く<b>命術の視点</b>。<br/><br/>"
+        "<b>第二の層</b>は、今回の診断で導き出された<br/>"
+        f"<b>「{main_type}（{main_tag}）」</b>という人生開花タイプの視点。<br/>"
+        f"さらに、<b>「{second_type}（{second_tag}）」</b>という隠れた才能の視点。<br/><br/>"
+        "<b>第三の層</b>は、あなた自身の言葉や選択から見えてくる<b>現実の視点</b>です。<br/><br/>"
+        "人は一つの言葉では説明できません。<br/>"
+        "だからこそ、このレポートでは一方向から決めつけるのではなく、<br/>"
+        "複数の角度からあなたという存在を描いていきます。"
+    )
+    elements.append(Paragraph(layers, styles['body']))
+    elements.append(Spacer(1, 4*mm))
+
+    # メッセージの核
+    core_message = (
+        "大切なのは、<b>「何者かになること」</b>ではありません。<br/>"
+        "むしろ、<b>「すでに持っているものに気づくこと」</b>です。<br/><br/>"
+        "人は欠けているから成長するのではなく、<br/>"
+        "持っているものを使い始めることで人生が動き出します。<br/><br/>"
+        "このレポートは、未来を予言するためのものではありません。<br/>"
+        "<b>あなたの中にすでに存在している可能性を、見つけやすくするための地図</b>です。"
+    )
+    elements.append(Paragraph(core_message, styles['quote']))
+    elements.append(Spacer(1, 4*mm))
+
+    # 読み方ガイド
+    elements.append(Paragraph("📖 このレポートの読み方", styles['h2']))
+    guide = (
+        "もし最初に読むなら、<br/>"
+        "・<b>第1章「あなたの本質」</b><br/>"
+        "・<b>第2章「人生開花タイプ」</b><br/>"
+        "・<b>第4章「人生の追い風とブレーキ」</b><br/>"
+        "から読み進めてください。今の自分を理解するヒントが見つかるはずです。<br/><br/>"
+        "また、迷った時、自信を失った時、人生の転機を迎えた時には、<br/>"
+        "<b>第5章「これからの開花シナリオ」</b>を開いてみてください。<br/>"
+        "そこには、今のあなたが忘れかけている大切な視点が記されています。"
+    )
+    elements.append(Paragraph(guide, styles['body']))
+    elements.append(Spacer(1, 4*mm))
+
+    # 結びの一文
+    closing = (
+        f"{name}さん。<br/><br/>"
+        "あなたの人生は、誰かの人生のコピーではありません。<br/>"
+        "そしてあなたという存在は、数字で見ても、経験で見ても、<br/>"
+        "<b>二度と再現されない唯一の組み合わせ</b>です。<br/><br/>"
+        "ここから始まるページは、その事実を思い出すための旅になります。"
+    )
+    elements.append(Paragraph(closing, styles['quote']))
+
+    return elements
+
+
 def generate_pdf(user_data: dict, result: dict, output_path: str):
     register_japanese_fonts()
     styles = make_styles()
@@ -188,9 +308,14 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     ))
     story.append(PageBreak())
 
-    # ============== Page 2: 占術データ一覧 ==============
-    story.append(Paragraph("第1章：あなたの設計図", styles['h1']))
-    story.append(Paragraph("9つの占術が語る、あなたの生まれ持った設計", styles['body']))
+    # ============== 序章：あなたという奇跡 ==============
+    for el in build_prologue(user_data, result, styles):
+        story.append(el)
+    story.append(PageBreak())
+
+    # ============== 第1章：あなたの本質（占術データ一覧） ==============
+    story.append(Paragraph("第1章：あなたの本質", styles['h1']))
+    story.append(Paragraph("8つの占術が語る、あなたの生まれ持った設計", styles['body']))
     story.append(Spacer(1, 5*mm))
 
     n = result['numerology']
@@ -273,8 +398,9 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     story.append(Paragraph("🌸 運気を上げる戦略", styles['h3']))
     story.append(Paragraph(wd.get('fortune_strategy', ''), styles['quote']))
 
-    # ============== Page 5: 総合診断・強みと使命 ==============
-    story.append(Paragraph("第4章：総合診断 — あなたの強みと使命", styles['h1']))
+    # ============== 第4章：人生の追い風とブレーキ ==============
+    story.append(Paragraph("第4章：人生の追い風とブレーキ", styles['h1']))
+    story.append(Paragraph("あなたの中で働く2つの力——あなたを前に進ませるものと、立ち止まらせるもの", styles['body']))
     story.append(Spacer(1, 3*mm))
 
     story.append(Paragraph("📌 占術が示すあなたの才能の核", styles['h2']))
@@ -312,34 +438,13 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     )
     story.append(Paragraph(pitfall_text, styles['body']))
 
-    # ============== Page 6: 相性診断 ==============
-    story.append(Paragraph("第5章：相性診断 — 大切な人との関係", styles['h1']))
-    story.append(Spacer(1, 3*mm))
-
-    story.append(Paragraph("💖 恋愛・パートナーシップ相性", styles['h2']))
-    love_text = (
-        f"<b>{mbti['type']}としての相性：</b><br/>{mbti.get('love_match', '')}<br/><br/>"
-        f"<b>{wd['type']}としての相性：</b><br/>{wd.get('love_match', '')}"
-    )
-    story.append(Paragraph(love_text, styles['quote']))
-    story.append(Spacer(1, 4*mm))
-
-    story.append(Paragraph("✨ 相性まとめ", styles['h2']))
-    matching_summary = (
-        f"あなたは<b>{mbti['type']}×{wd['type']}</b>の組み合わせ。<br/>"
-        f"パートナーには、あなたの<b>「{mbti.get('strengths', [''])[0]}」</b>を理解し、"
-        f"あなたが苦手な<b>「{mbti.get('weaknesses', [''])[0]}」</b>を補ってくれる人が最適です。<br/><br/>"
-        f"恋愛では深い理解と魂レベルのつながりを、"
-        f"ビジネスでは実務面の補完と相互尊重を意識してください。"
-    )
-    story.append(Paragraph(matching_summary, styles['body']))
-
-    # ============== Page 7: 運勢サイクル ==============
+    # ============== 第5章：これからの開花シナリオ ==============
     fortune = result.get('fortune', {})
     fortune_3y = result.get('fortune_3years', [])
     tc_periods = result.get('tenchusatsu_years', {})
 
-    story.append(Paragraph("第6章：運勢サイクル — タイミングを味方に", styles['h1']))
+    story.append(Paragraph("第5章：これからの開花シナリオ", styles['h1']))
+    story.append(Paragraph("運勢サイクルを味方に、1年後のあなたを描く", styles['body']))
     story.append(Spacer(1, 3*mm))
 
     story.append(Paragraph("🌙 あなたの天中殺", styles['h2']))
@@ -417,11 +522,55 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         f"その年までに種を蒔き、準備を整えておくと、人生最大の実りを得られます。"
     )
     story.append(Paragraph(strategy_text, styles['quote']))
+    story.append(Spacer(1, 5*mm))
 
-    # ============== 数秘ライフパス 深掘りページ ==============
+    # 第5章の最後に「1年の行動指針」をサブセクションとして統合
+    story.append(Paragraph("🌸 これから1年であなたが取るべき3つのアクション", styles['h2']))
+    actions = [
+        f"<b>1. 才能を開く</b>：{ws['sun']['name']}の輝きを活かした「{ws['sun']['theme'].split('・')[0]}」の場を1つ作る。",
+        f"<b>2. 仲間を結ぶ</b>：{result['shusei']['name']}の力を活かして、信頼できる仲間との対話を月1回以上持つ。",
+        f"<b>3. 強みを投下する</b>：{wd['type']}としての「{wd.get('strengths', [''])[0]}」を、新しい挑戦に投下する。",
+    ]
+    for a in actions:
+        story.append(Paragraph(a, styles['body']))
+        story.append(Spacer(1, 2*mm))
+
+    story.append(Spacer(1, 4*mm))
+    story.append(Paragraph("⚠️ 今年避けるべきこと", styles['h2']))
+    avoid = [
+        f"<b>1. </b>{mbti.get('weaknesses', [''])[0]}に陥らないよう、自分のパターンを観察する。",
+        f"<b>2. </b>{wd.get('weaknesses', [''])[0]}は{wd['type']}の典型的な失敗パターン。仲間と補完する。",
+        f"<b>3. </b>天中殺の年（{'・'.join(tc.get('branches', []))}年）に大きな決断はしない。",
+    ]
+    for a in avoid:
+        story.append(Paragraph(a, styles['body']))
+        story.append(Spacer(1, 2*mm))
+
+    # ============== 第6章：大切な人との相性 ==============
+    story.append(Paragraph("第6章：大切な人との相性", styles['h1']))
+    story.append(Spacer(1, 3*mm))
+
+    story.append(Paragraph("💖 恋愛・パートナーシップ相性", styles['h2']))
+    love_text = (
+        f"<b>{mbti['type']}としての相性：</b><br/>{mbti.get('love_match', '')}<br/><br/>"
+        f"<b>{wd['type']}としての相性：</b><br/>{wd.get('love_match', '')}"
+    )
+    story.append(Paragraph(love_text, styles['quote']))
+    story.append(Spacer(1, 4*mm))
+
+    story.append(Paragraph("✨ 相性まとめ", styles['h2']))
+    matching_summary = (
+        f"あなたは<b>{mbti['type']}×{wd['type']}</b>の組み合わせ。<br/>"
+        f"パートナーには、あなたの<b>「{mbti.get('strengths', [''])[0]}」</b>を理解し、"
+        f"あなたが苦手な<b>「{mbti.get('weaknesses', [''])[0]}」</b>を補ってくれる人が最適です。<br/><br/>"
+        f"恋愛では深い理解と魂レベルのつながりを大切に。"
+    )
+    story.append(Paragraph(matching_summary, styles['body']))
+
+    # ============== 第7章：数秘ライフパス深掘り ==============
     lp_deep = result.get('numerology', {}).get('life_path_deep', {})
     if lp_deep:
-        story.append(Paragraph(f"数秘ライフパス {n['life_path']['number']} — 深掘り解説", styles['h1']))
+        story.append(Paragraph(f"第7章：数秘ライフパス {n['life_path']['number']} — あなたの数の物語", styles['h1']))
         story.append(Paragraph(f"<b>{lp_deep.get('title', '')}</b>", styles['h2']))
         story.append(Paragraph(lp_deep.get('essence', ''), styles['quote']))
         story.append(Spacer(1, 3*mm))
@@ -441,7 +590,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== Page 8: 姓名判断（新規追加） ==============
     seimei = result.get('seimei', {})
     if seimei:
-        story.append(Paragraph("第7章：姓名判断 — 名前という、最初の贈り物", styles['h1']))
+        story.append(Paragraph("第8章：姓名判断 — 名前という、最初の贈り物", styles['h1']))
         story.append(Spacer(1, 3*mm))
 
         story.append(Paragraph(
@@ -490,38 +639,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         sansai = seimei.get('sansai', {})
         story.append(Paragraph(f"🌳 三才配置：{sansai.get('combo', '')}", styles['h3']))
         story.append(Paragraph(sansai.get('meaning', ''), styles['body']))
-
-    # ============== Page 9: これからの行動指針 ==============
-    story.append(Paragraph("第8章：これから1年の行動指針", styles['h1']))
-    story.append(Spacer(1, 5*mm))
-
-    story.append(Paragraph("🌸 あなたが今年取るべき3つのアクション", styles['h2']))
-    actions = [
-        f"<b>1. 才能を開く</b>：{ws['sun']['name']}の輝きを活かした「{ws['sun']['theme'].split('・')[0]}」の場を1つ作る。",
-        f"<b>2. 仲間を結ぶ</b>：{result['shusei']['name']}の力を活かして、信頼できる仲間との対話を月1回以上持つ。",
-        f"<b>3. 強みを投下する</b>：{wd['type']}としての「{wd.get('strengths', [''])[0]}」を、新しい挑戦に投下する。",
-    ]
-    for a in actions:
-        story.append(Paragraph(a, styles['body']))
-        story.append(Spacer(1, 2*mm))
-
-    story.append(Spacer(1, 5*mm))
-    story.append(Paragraph("⚠️ 今年避けるべきこと", styles['h2']))
-    avoid = [
-        f"<b>1. </b>{mbti.get('weaknesses', [''])[0]}に陥らないよう、自分のパターンを観察する。",
-        f"<b>2. </b>{wd.get('weaknesses', [''])[0]}は{wd['type']}の典型的な失敗パターン。仲間と補完する。",
-        f"<b>3. </b>天中殺の年（{'・'.join(tc.get('branches', []))}年）に大きな決断はしない。",
-    ]
-    for a in avoid:
-        story.append(Paragraph(a, styles['body']))
-        story.append(Spacer(1, 2*mm))
-
-    story.append(Spacer(1, 6*mm))
-    story.append(Paragraph(
-        "<i>このレポートは『人生は何度でも再起動できる』という真実への、最初の地図です。<br/>"
-        "占術データはあなたの「設計」を示すだけ。実際にそれを生きるのは、あなた自身です。</i>",
-        styles['quote']
-    ))
 
     # ============== 自由記述章：あなたの言葉が映す本質 ==============
     narrative = result.get('narrative', {})
