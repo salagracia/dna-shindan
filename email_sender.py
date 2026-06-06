@@ -168,7 +168,9 @@ def send_pdf_email(to_email: str, user_name: str, pdf_path: str) -> dict:
 
   <p>
     山岡サラ（サラグラシアアカデミー）<br>
-    <a href="https://salagracia.com" style="color: #8B4789;">https://salagracia.com</a>
+    🎬 YouTubeチャンネル「脳をだまして若返る」<br>
+    <a href="https://www.youtube.com/@agelessJP" style="color: #8B4789;">https://www.youtube.com/@agelessJP</a><br>
+    <span style="color: #888; font-size: 0.9em;">（登録者12,500人・50代女性のための若返り×ライフスタイル動画）</span>
   </p>
 
   <hr style="border: 1px solid #ccc;">
@@ -207,7 +209,10 @@ def send_pdf_email(to_email: str, user_name: str, pdf_path: str) -> dict:
 
 山岡サラ
 サラグラシアアカデミー
-https://salagracia.com
+
+🎬 YouTubeチャンネル「脳をだまして若返る」
+https://www.youtube.com/@agelessJP
+（登録者12,500人・50代女性のための若返り×ライフスタイル動画）
 """
 
     try:
