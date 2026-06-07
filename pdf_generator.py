@@ -863,9 +863,9 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(PageBreak())
 
     # ============== Page 10: サラからの手紙 ==============
-    story.append(Spacer(1, 15*mm))
+    story.append(Spacer(1, 12*mm))
     story.append(Paragraph("あなたへ — サラからの手紙", styles['title']))
-    story.append(Spacer(1, 10*mm))
+    story.append(Spacer(1, 8*mm))
 
     letter_paragraphs = [
         "このレポートを読み終えたあなたに、伝えたいことがあります。",
@@ -873,18 +873,39 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         "50代を超えた女性は、「もう遅い」と思いがちです。<br/>"
         "でも、それは社会が植え付けた幻想です。",
         "",
-        "あなたの星、あなたの命、あなたの名前。<br/>"
-        "すべてが「<b>これからが本番</b>」と語っています。",
+        "あなたの星。<br/>"
+        "あなたの命。<br/>"
+        "あなたの名前。<br/>"
+        "すべてが、「<b>これからが本番</b>」と語っています。",
         "",
         "老いることは、衰えることではありません。<br/>"
         "<b>深まること。磨かれること。本物になっていくこと</b>。",
         "",
-        "これからのあなたは、20代の自分には決して手に入らなかった——<br/>"
-        "<b>ゆるぎない美しさ・本物の自由・深い愛</b>を、<br/>"
-        "1年ごとに重ねていく女性です。",
+        "これからのあなたは、20代の自分には決して手に入らなかった<br/>"
+        "・<b>ゆるぎない美しさ</b><br/>"
+        "・<b>本物の自由</b><br/>"
+        "・<b>深い愛</b><br/>"
+        "を、一年ごとに重ねていく女性です。",
         "",
         "恐れないでください。<br/>"
         "<b>あなたの最も美しい時間は、これから始まります。</b>",
+        "",
+        "<br/>でもね。<br/>"
+        "<b>人生は、自分を知っただけでは変わりません。</b>",
+        "",
+        "私もたくさん学びました。<br/>"
+        "本も読みました。セミナーにも行きました。<br/>"
+        "でも本当に人生が変わり始めたのは、<br/>"
+        "<b>「毎日の小さな習慣」が変わった時</b>でした。",
+        "",
+        "だから私は、私自身が14年間続けてきた<br/>"
+        "<b>食・感謝・心・体の整え方</b>を、<br/>"
+        "<b>「人生を生き直す28日間」</b>にまとめました。",
+        "",
+        "もしあなたが、この診断結果を読んで<br/>"
+        "「もっと自分らしく生きたい」<br/>"
+        "「人生をもう一度輝かせたい」<br/>"
+        "そう感じたなら、次の一歩を踏み出してみてください。",
     ]
     for p in letter_paragraphs:
         if p:
@@ -892,14 +913,16 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         else:
             story.append(Spacer(1, 3*mm))
 
-    story.append(Spacer(1, 10*mm))
+    story.append(Spacer(1, 6*mm))
     story.append(Paragraph(
-        "<b>『人生は、何度でも再起動できる』</b>",
+        "<b>『人生は、何度でも再起動できる』</b><br/><br/>"
+        "その言葉を、今度は知識ではなく、<br/>"
+        "あなた自身の人生で体験してほしいのです。",
         styles['quote']
     ))
-    story.append(Spacer(1, 8*mm))
+    story.append(Spacer(1, 6*mm))
     story.append(Paragraph(
-        "山岡サラ（サラグラシアアカデミー）",
+        "サラ 🌹",
         styles['small']
     ))
 
