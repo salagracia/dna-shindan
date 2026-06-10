@@ -10,7 +10,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, PageBreak,
-    Table, TableStyle, ListFlowable, ListItem
+    Table, TableStyle, ListFlowable, ListItem, Image
 )
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -311,6 +311,15 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== 序章：あなたという奇跡 ==============
     for el in build_prologue(user_data, result, styles):
         story.append(el)
+    # 希少性チャート挿入
+    try:
+        from calculations.chart_generator import make_rarity_chart
+        chart_path = make_rarity_chart()
+        story.append(Spacer(1, 4*mm))
+        story.append(Image(chart_path, width=100*mm, height=67*mm, hAlign='CENTER'))
+        story.append(Spacer(1, 3*mm))
+    except Exception as e:
+        print(f"[CHART] rarity error: {e}")
     story.append(PageBreak())
 
     # ============== 第1章：あなたの本質（占術データ一覧） ==============
@@ -360,6 +369,18 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         ('WORDWRAP', (0, 0), (-1, -1), True),
     ]))
     story.append(tbl)
+
+    # 4タイプ レーダーチャート挿入
+    try:
+        from calculations.chart_generator import make_type_radar
+        kaika = result.get('personality', {}).get('jinsei_kaika', {})
+        scores = kaika.get('all_scores', {'A': 6, 'B': 6, 'C': 6, 'D': 6})
+        story.append(Spacer(1, 3*mm))
+        chart_path = make_type_radar(scores)
+        story.append(Image(chart_path, width=95*mm, height=95*mm, hAlign='CENTER'))
+        story.append(Spacer(1, 3*mm))
+    except Exception as e:
+        print(f"[CHART] radar error: {e}")
 
     # 第1章 本文（narrative_generatorから取得・サラ専用テスト本文／Phase2でAPI生成）
     from calculations.narrative_generator import get_chapter1_narrative
@@ -438,6 +459,13 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     # ============== 第4章：人生の追い風とブレーキ ==============
     story.append(Paragraph("第4章：人生の追い風とブレーキ", styles['h1']))
+    try:
+        from calculations.chart_generator import make_balance_chart
+        chart_path = make_balance_chart()
+        story.append(Image(chart_path, width=120*mm, height=60*mm, hAlign='CENTER'))
+        story.append(Spacer(1, 3*mm))
+    except Exception as e:
+        print(f"[CHART] balance error: {e}")
 
     from calculations.narrative_generator import get_chapter4_narrative
     ch4 = get_chapter4_narrative(user_data, result)
@@ -497,6 +525,19 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     current_p = tc_periods.get('current_period')
 
     story.append(Paragraph("第5章：これからの開花シナリオ", styles['h1']))
+    try:
+        from calculations.chart_generator import make_three_year_wave
+        from datetime import datetime as _dt
+        cur_year = _dt.now().year
+        chart_path = make_three_year_wave([
+            (f'{cur_year}年', '整える'),
+            (f'{cur_year+1}年', '広げる'),
+            (f'{cur_year+2}年', '実らせる'),
+        ])
+        story.append(Image(chart_path, width=140*mm, height=70*mm, hAlign='CENTER'))
+        story.append(Spacer(1, 3*mm))
+    except Exception as e:
+        print(f"[CHART] wave error: {e}")
 
     from calculations.narrative_generator import get_chapter5_narrative
     ch5 = get_chapter5_narrative(user_data, result)
@@ -654,6 +695,17 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     if ch7:
         # 本文（サラ専用 or 汎用テンプレ）＋ 数秘の具体解説
         story.append(Paragraph("第7章：数字に宿る、あなたの人生のテーマ", styles['h1']))
+        try:
+            from calculations.chart_generator import make_three_numbers_venn
+            chart_path = make_three_numbers_venn(
+                n['life_path']['number'],
+                n['birth_day']['number'],
+                n.get('destiny', {}).get('number', 0)
+            )
+            story.append(Image(chart_path, width=110*mm, height=90*mm, hAlign='CENTER'))
+            story.append(Spacer(1, 3*mm))
+        except Exception as e:
+            print(f"[CHART] venn error: {e}")
         for key in ['intro', 'essence', 'shadow', 'triple', 'mature']:
             story.append(Paragraph(ch7[f'{key}_h2'], styles['h2']))
             story.append(Paragraph(ch7[f'{key}_body'], styles['body']))
@@ -698,6 +750,14 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     if ch8:
         # 本文（サラ専用 or 汎用テンプレ）
         story.append(Paragraph("第8章：名前に宿る、あなたへの祝福", styles['h1']))
+        try:
+            from calculations.chart_generator import make_seimei_pyramid
+            if seimei:
+                chart_path = make_seimei_pyramid(seimei.get('gokaku', {}))
+                story.append(Image(chart_path, width=130*mm, height=92*mm, hAlign='CENTER'))
+                story.append(Spacer(1, 3*mm))
+        except Exception as e:
+            print(f"[CHART] pyramid error: {e}")
         # gift → five は本文だけ。その後で実際の五格テーブルを挿入。
         for key in ['gift', 'five']:
             story.append(Paragraph(ch8[f'{key}_h2'], styles['h2']))

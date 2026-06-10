@@ -7,3 +7,5 @@ pdfplumber
 lunar-python
 skyfield
 resend
+matplotlib
+numpy
