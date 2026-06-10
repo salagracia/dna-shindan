@@ -143,6 +143,34 @@ def bullet_list(items, styles):
     )
 
 
+def chapter_illustration(filename: str, width_mm: float = 70) -> list:
+    """章ヘッダー用イラストを返す。ファイル無ければ空リスト。
+    width_mm: PDF上の表示幅（高さは正方形前提で同じ）
+    """
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    fp = os.path.join(project_dir, 'assets', 'illustrations', filename)
+    if not os.path.exists(fp):
+        return []
+    return [
+        Spacer(1, 2*mm),
+        Image(fp, width=width_mm*mm, height=width_mm*mm, hAlign='CENTER'),
+        Spacer(1, 3*mm),
+    ]
+
+
+def chapter_illustration_wide(filename: str, width_mm: float = 130, height_mm: float = 75) -> list:
+    """横長イラスト用（第5章など）"""
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    fp = os.path.join(project_dir, 'assets', 'illustrations', filename)
+    if not os.path.exists(fp):
+        return []
+    return [
+        Spacer(1, 2*mm),
+        Image(fp, width=width_mm*mm, height=height_mm*mm, hAlign='CENTER'),
+        Spacer(1, 3*mm),
+    ]
+
+
 def build_prologue(user_data: dict, result: dict, styles) -> list:
     """序章：あなたという奇跡
     山岡サラ監修・希望のトーンで、占術データを「数千〜数万人に1人」の希少性として提示。
@@ -162,6 +190,13 @@ def build_prologue(user_data: dict, result: dict, styles) -> list:
     second_tag = kaika.get('second_tagline', '')
 
     elements.append(Paragraph("序章　あなたという奇跡", styles['h1']))
+    # ヘッダーイラスト
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    illust_fp = os.path.join(project_dir, 'assets', 'illustrations', '01_prologue.png')
+    if os.path.exists(illust_fp):
+        elements.append(Spacer(1, 2*mm))
+        elements.append(Image(illust_fp, width=70*mm, height=70*mm, hAlign='CENTER'))
+        elements.append(Spacer(1, 3*mm))
 
     # 段落リスト：すべて body スタイル、一行ずつの改行リズムを <br/> で表現
     intro = (
@@ -324,6 +359,8 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     # ============== 第1章：あなたの本質（占術データ一覧） ==============
     story.append(Paragraph("第1章：あなたの本質", styles['h1']))
+    for el in chapter_illustration('02_chapter1_mirror.png', 65):
+        story.append(el)
     story.append(Paragraph("8つの占術が語る、あなたの生まれ持った設計", styles['body']))
     story.append(Spacer(1, 5*mm))
 
@@ -400,6 +437,20 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== Page 3: 人生開花タイプ詳細（メイン） ==============
     mbti = result['personality']['mbti']
     story.append(Paragraph(f"第2章：あなたの人生開花タイプ", styles['h1']))
+    for el in chapter_illustration('03_chapter2_bouquet.png', 65):
+        story.append(el)
+    # メインタイプに応じた象徴イラスト
+    kaika_main = result.get('personality', {}).get('jinsei_kaika', {})
+    main_code = kaika_main.get('type', 'A')
+    type_illust_map = {
+        'A': '12_type_A_creation.png',
+        'B': '13_type_B_healing.png',
+        'C': '14_type_C_guidance.png',
+        'D': '15_type_D_beauty.png',
+    }
+    type_illust_fn = type_illust_map.get(main_code, '12_type_A_creation.png')
+    for el in chapter_illustration(type_illust_fn, 55):
+        story.append(el)
 
     # narrative_generatorから本文取得（サラ専用テスト本文／Phase2でAPI生成）
     from calculations.narrative_generator import get_chapter2_narrative
@@ -433,6 +484,13 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== Page 4: 隠れ才能タイプ（第2位） ==============
     wd = result['personality']['wd']
     story.append(Paragraph(f"第3章：あなたの隠れ才能タイプ", styles['h1']))
+    for el in chapter_illustration('04_chapter3_bud.png', 65):
+        story.append(el)
+    # 隠れ才能タイプに応じた象徴イラスト
+    second_code = kaika_main.get('second_type', 'D')
+    second_illust_fn = type_illust_map.get(second_code, '15_type_D_beauty.png')
+    for el in chapter_illustration(second_illust_fn, 55):
+        story.append(el)
 
     from calculations.narrative_generator import get_chapter3_narrative
     ch3 = get_chapter3_narrative(user_data, result)
@@ -459,6 +517,8 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     # ============== 第4章：人生の追い風とブレーキ ==============
     story.append(Paragraph("第4章：人生の追い風とブレーキ", styles['h1']))
+    for el in chapter_illustration('05_chapter4_sailboat.png', 65):
+        story.append(el)
     try:
         from calculations.chart_generator import make_balance_chart
         chart_path = make_balance_chart()
@@ -525,6 +585,8 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     current_p = tc_periods.get('current_period')
 
     story.append(Paragraph("第5章：これからの開花シナリオ", styles['h1']))
+    for el in chapter_illustration_wide('06_chapter5_blooming.png', 140, 80):
+        story.append(el)
     try:
         from calculations.chart_generator import make_three_year_wave
         from datetime import datetime as _dt
@@ -659,6 +721,8 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     # ============== 第6章：大切な人との相性 ==============
     story.append(Paragraph("第6章：大切な人との相性", styles['h1']))
+    for el in chapter_illustration('07_chapter6_hands.png', 65):
+        story.append(el)
 
     from calculations.narrative_generator import get_chapter6_narrative
     ch6 = get_chapter6_narrative(user_data, result)
@@ -695,6 +759,8 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     if ch7:
         # 本文（サラ専用 or 汎用テンプレ）＋ 数秘の具体解説
         story.append(Paragraph("第7章：数字に宿る、あなたの人生のテーマ", styles['h1']))
+        for el in chapter_illustration('08_chapter7_numbers.png', 65):
+            story.append(el)
         try:
             from calculations.chart_generator import make_three_numbers_venn
             chart_path = make_three_numbers_venn(
@@ -750,6 +816,8 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     if ch8:
         # 本文（サラ専用 or 汎用テンプレ）
         story.append(Paragraph("第8章：名前に宿る、あなたへの祝福", styles['h1']))
+        for el in chapter_illustration('09_chapter8_calligraphy.png', 65):
+            story.append(el)
         try:
             from calculations.chart_generator import make_seimei_pyramid
             if seimei:
@@ -873,6 +941,8 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     if ch9:
         # サラ専用：深掘り版本文
         story.append(Paragraph("第9章：あなたの言葉が映す本質", styles['h1']))
+        for el in chapter_illustration('10_chapter9_letter.png', 65):
+            story.append(el)
         for key in ['opening', 'talent', 'value', 'future', 'integration']:
             story.append(Paragraph(ch9[f'{key}_h2'], styles['h2']))
             story.append(Paragraph(ch9[f'{key}_body'], styles['body']))
@@ -923,8 +993,10 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(PageBreak())
 
     # ============== Page 10: サラからの手紙 ==============
-    story.append(Spacer(1, 12*mm))
+    story.append(Spacer(1, 8*mm))
     story.append(Paragraph("あなたへ — サラからの手紙", styles['title']))
+    for el in chapter_illustration('11_epilogue_roses.png', 75):
+        story.append(el)
     story.append(Spacer(1, 8*mm))
 
     letter_paragraphs = [
