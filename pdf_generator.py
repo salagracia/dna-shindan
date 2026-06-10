@@ -10,7 +10,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, PageBreak,
-    Table, TableStyle, ListFlowable, ListItem, Image
+    Table, TableStyle, ListFlowable, ListItem, Image, ImageAndFlowables
 )
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -143,32 +143,36 @@ def bullet_list(items, styles):
     )
 
 
-def chapter_illustration(filename: str, width_mm: float = 70) -> list:
-    """章ヘッダー用イラストを返す。ファイル無ければ空リスト。
-    width_mm: PDF上の表示幅（高さは正方形前提で同じ）
+def chapter_illustration(filename: str, width_mm: float = 35) -> Image | None:
+    """章用イラストImageオブジェクトを返す（小さく・フロート用）
+    width_mm: PDF上の表示幅（デフォルト35mm = 1/4サイズ）
     """
     project_dir = os.path.dirname(os.path.abspath(__file__))
     fp = os.path.join(project_dir, 'assets', 'illustrations', filename)
     if not os.path.exists(fp):
-        return []
-    return [
-        Spacer(1, 2*mm),
-        Image(fp, width=width_mm*mm, height=width_mm*mm, hAlign='CENTER'),
-        Spacer(1, 3*mm),
-    ]
+        return None
+    return Image(fp, width=width_mm*mm, height=width_mm*mm)
 
 
-def chapter_illustration_wide(filename: str, width_mm: float = 130, height_mm: float = 75) -> list:
-    """横長イラスト用（第5章など）"""
+def chapter_illustration_wide(filename: str, width_mm: float = 45, height_mm: float = 26) -> Image | None:
+    """横長イラスト（小さめ・フロート用）"""
     project_dir = os.path.dirname(os.path.abspath(__file__))
     fp = os.path.join(project_dir, 'assets', 'illustrations', filename)
     if not os.path.exists(fp):
-        return []
-    return [
-        Spacer(1, 2*mm),
-        Image(fp, width=width_mm*mm, height=height_mm*mm, hAlign='CENTER'),
-        Spacer(1, 3*mm),
-    ]
+        return None
+    return Image(fp, width=width_mm*mm, height=height_mm*mm)
+
+
+def floating_image_with_text(img: Image, text_flowables: list, side: str = 'left') -> ImageAndFlowables:
+    """イラストを左or右に配置、テキストを回り込ませる"""
+    return ImageAndFlowables(
+        img, text_flowables,
+        imageSide=side,
+        imageLeftPadding=3*mm,
+        imageRightPadding=3*mm,
+        imageTopPadding=2*mm,
+        imageBottomPadding=2*mm,
+    )
 
 
 def build_prologue(user_data: dict, result: dict, styles) -> list:
@@ -190,13 +194,6 @@ def build_prologue(user_data: dict, result: dict, styles) -> list:
     second_tag = kaika.get('second_tagline', '')
 
     elements.append(Paragraph("序章　あなたという奇跡", styles['h1']))
-    # ヘッダーイラスト
-    project_dir = os.path.dirname(os.path.abspath(__file__))
-    illust_fp = os.path.join(project_dir, 'assets', 'illustrations', '01_prologue.png')
-    if os.path.exists(illust_fp):
-        elements.append(Spacer(1, 2*mm))
-        elements.append(Image(illust_fp, width=70*mm, height=70*mm, hAlign='CENTER'))
-        elements.append(Spacer(1, 3*mm))
 
     # 段落リスト：すべて body スタイル、一行ずつの改行リズムを <br/> で表現
     intro = (
@@ -350,9 +347,17 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     # ============== 第1章：あなたの本質（占術データ一覧） ==============
     story.append(Paragraph("第1章：あなたの本質", styles['h1']))
-    for el in chapter_illustration('02_chapter1_mirror.png', 65):
-        story.append(el)
-    story.append(Paragraph("8つの占術が語る、あなたの生まれ持った設計", styles['body']))
+    # 小さなイラスト + リード文 をフロート配置
+    img1 = chapter_illustration('02_chapter1_mirror.png', 35)
+    intro_text = Paragraph(
+        "8つの占術が語る、あなたの生まれ持った設計を見ていきましょう。"
+        "東洋・西洋の叡智が交わる場所に、あなたの本質が浮かび上がります。",
+        styles['body']
+    )
+    if img1:
+        story.append(floating_image_with_text(img1, [intro_text], side='left'))
+    else:
+        story.append(intro_text)
     story.append(Spacer(1, 5*mm))
 
     n = result['numerology']
@@ -416,7 +421,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== Page 3: 人生開花タイプ詳細（メイン） ==============
     mbti = result['personality']['mbti']
     story.append(Paragraph(f"第2章：あなたの人生開花タイプ", styles['h1']))
-    # メインタイプに応じた象徴イラスト（花束イラストは削除・サラさん指示）
+    # メインタイプに応じた象徴イラスト
     kaika_main = result.get('personality', {}).get('jinsei_kaika', {})
     main_code = kaika_main.get('type', 'A')
     type_illust_map = {
@@ -426,15 +431,26 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         'D': '15_type_D_beauty.png',
     }
     type_illust_fn = type_illust_map.get(main_code, '12_type_A_creation.png')
-    for el in chapter_illustration(type_illust_fn, 65):
-        story.append(el)
+    img2 = chapter_illustration(type_illust_fn, 35)
 
-    # narrative_generatorから本文取得（サラ専用テスト本文／Phase2でAPI生成）
+    # narrative_generatorから本文取得
     from calculations.narrative_generator import get_chapter2_narrative
     ch2 = get_chapter2_narrative(user_data, result)
     if ch2:
         story.append(Paragraph(f"あなたのタイプ：<b>{mbti['type']} — {mbti.get('label', '')}</b>", styles['h2']))
-        for key in ['talent', 'scene', 'past', 'bloom', 'future']:
+        # 最初のセクション (talent) + イラストをフロート配置
+        first_section = [
+            Paragraph(ch2['talent_h2'], styles['h2']),
+            Paragraph(ch2['talent_body'], styles['body']),
+        ]
+        if img2:
+            story.append(floating_image_with_text(img2, first_section, side='right'))
+        else:
+            for el in first_section:
+                story.append(el)
+        story.append(Spacer(1, 3*mm))
+        # 残りのセクションは通常配置
+        for key in ['scene', 'past', 'bloom', 'future']:
             story.append(Paragraph(ch2[f'{key}_h2'], styles['h2']))
             story.append(Paragraph(ch2[f'{key}_body'], styles['body']))
             story.append(Spacer(1, 3*mm))
@@ -461,17 +477,28 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== Page 4: 隠れ才能タイプ（第2位） ==============
     wd = result['personality']['wd']
     story.append(Paragraph(f"第3章：あなたの隠れ才能タイプ", styles['h1']))
-    # 隠れ才能タイプに応じた象徴イラスト（蕾ヘッダーは削除・サラさん指示）
+    # 隠れ才能タイプに応じた象徴イラスト
     second_code = kaika_main.get('second_type', 'D')
     second_illust_fn = type_illust_map.get(second_code, '15_type_D_beauty.png')
-    for el in chapter_illustration(second_illust_fn, 65):
-        story.append(el)
+    img3 = chapter_illustration(second_illust_fn, 35)
 
     from calculations.narrative_generator import get_chapter3_narrative
     ch3 = get_chapter3_narrative(user_data, result)
     if ch3:
         story.append(Paragraph(f"あなたのタイプ：<b>{wd['type']} — {wd.get('label', '')}</b>", styles['h2']))
-        for key in ['awakening', 'scene', 'overlap', 'practice', 'future']:
+        # 最初のセクション (awakening) + イラストをフロート配置
+        first_section = [
+            Paragraph(ch3['awakening_h2'], styles['h2']),
+            Paragraph(ch3['awakening_body'], styles['body']),
+        ]
+        if img3:
+            story.append(floating_image_with_text(img3, first_section, side='left'))
+        else:
+            for el in first_section:
+                story.append(el)
+        story.append(Spacer(1, 3*mm))
+        # 残りのセクションは通常配置
+        for key in ['scene', 'overlap', 'practice', 'future']:
             story.append(Paragraph(ch3[f'{key}_h2'], styles['h2']))
             story.append(Paragraph(ch3[f'{key}_body'], styles['body']))
             story.append(Spacer(1, 3*mm))
@@ -552,26 +579,23 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     current_p = tc_periods.get('current_period')
 
     story.append(Paragraph("第5章：これからの開花シナリオ", styles['h1']))
-    for el in chapter_illustration_wide('06_chapter5_blooming.png', 140, 80):
-        story.append(el)
-    try:
-        from calculations.chart_generator import make_three_year_wave
-        from datetime import datetime as _dt
-        cur_year = _dt.now().year
-        chart_path = make_three_year_wave([
-            (f'{cur_year}年', '整える'),
-            (f'{cur_year+1}年', '広げる'),
-            (f'{cur_year+2}年', '実らせる'),
-        ])
-        story.append(Image(chart_path, width=140*mm, height=70*mm, hAlign='CENTER'))
-        story.append(Spacer(1, 3*mm))
-    except Exception as e:
-        print(f"[CHART] wave error: {e}")
+    img5 = chapter_illustration_wide('06_chapter5_blooming.png', 50, 28)
 
     from calculations.narrative_generator import get_chapter5_narrative
     ch5 = get_chapter5_narrative(user_data, result)
     if ch5:
-        for key in ['three_years', 'pause', 'actions', 'release', 'letter']:
+        # 最初のセクション + イラスト をフロート配置
+        first5 = [
+            Paragraph(ch5['three_years_h2'], styles['h2']),
+            Paragraph(ch5['three_years_body'], styles['body']),
+        ]
+        if img5:
+            story.append(floating_image_with_text(img5, first5, side='right'))
+        else:
+            for el in first5:
+                story.append(el)
+        story.append(Spacer(1, 3*mm))
+        for key in ['pause', 'actions', 'release', 'letter']:
             story.append(Paragraph(ch5[f'{key}_h2'], styles['h2']))
             # 「1年後のあなたへ」セクションだけquoteスタイルで温度感UP
             body_style = styles['quote'] if key == 'letter' else styles['body']
@@ -688,13 +712,23 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     # ============== 第6章：大切な人との相性 ==============
     story.append(Paragraph("第6章：大切な人との相性", styles['h1']))
-    for el in chapter_illustration('07_chapter6_hands.png', 65):
-        story.append(el)
+    img6 = chapter_illustration('07_chapter6_hands.png', 35)
 
     from calculations.narrative_generator import get_chapter6_narrative
     ch6 = get_chapter6_narrative(user_data, result)
     if ch6:
-        for key in ['seeking', 'enabler', 'draining', 'quality', 'nurture']:
+        # 最初のセクション (seeking) + イラスト をフロート配置
+        first6 = [
+            Paragraph(ch6['seeking_h2'], styles['h2']),
+            Paragraph(ch6['seeking_body'], styles['body']),
+        ]
+        if img6:
+            story.append(floating_image_with_text(img6, first6, side='left'))
+        else:
+            for el in first6:
+                story.append(el)
+        story.append(Spacer(1, 3*mm))
+        for key in ['enabler', 'draining', 'quality', 'nurture']:
             story.append(Paragraph(ch6[f'{key}_h2'], styles['h2']))
             story.append(Paragraph(ch6[f'{key}_body'], styles['body']))
             story.append(Spacer(1, 3*mm))
@@ -726,20 +760,19 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     if ch7:
         # 本文（サラ専用 or 汎用テンプレ）＋ 数秘の具体解説
         story.append(Paragraph("第7章：数字に宿る、あなたの人生のテーマ", styles['h1']))
-        for el in chapter_illustration('08_chapter7_numbers.png', 65):
-            story.append(el)
-        try:
-            from calculations.chart_generator import make_three_numbers_venn
-            chart_path = make_three_numbers_venn(
-                n['life_path']['number'],
-                n['birth_day']['number'],
-                n.get('destiny', {}).get('number', 0)
-            )
-            story.append(Image(chart_path, width=110*mm, height=90*mm, hAlign='CENTER'))
-            story.append(Spacer(1, 3*mm))
-        except Exception as e:
-            print(f"[CHART] venn error: {e}")
-        for key in ['intro', 'essence', 'shadow', 'triple', 'mature']:
+        img7 = chapter_illustration('08_chapter7_numbers.png', 35)
+        # 最初のセクション (intro) + イラスト をフロート配置
+        first7 = [
+            Paragraph(ch7['intro_h2'], styles['h2']),
+            Paragraph(ch7['intro_body'], styles['body']),
+        ]
+        if img7:
+            story.append(floating_image_with_text(img7, first7, side='right'))
+        else:
+            for el in first7:
+                story.append(el)
+        story.append(Spacer(1, 3*mm))
+        for key in ['essence', 'shadow', 'triple', 'mature']:
             story.append(Paragraph(ch7[f'{key}_h2'], styles['h2']))
             story.append(Paragraph(ch7[f'{key}_body'], styles['body']))
             story.append(Spacer(1, 3*mm))
@@ -783,21 +816,22 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     if ch8:
         # 本文（サラ専用 or 汎用テンプレ）
         story.append(Paragraph("第8章：名前に宿る、あなたへの祝福", styles['h1']))
-        for el in chapter_illustration('09_chapter8_calligraphy.png', 65):
-            story.append(el)
-        try:
-            from calculations.chart_generator import make_seimei_pyramid
-            if seimei:
-                chart_path = make_seimei_pyramid(seimei.get('gokaku', {}))
-                story.append(Image(chart_path, width=130*mm, height=92*mm, hAlign='CENTER'))
-                story.append(Spacer(1, 3*mm))
-        except Exception as e:
-            print(f"[CHART] pyramid error: {e}")
-        # gift → five は本文だけ。その後で実際の五格テーブルを挿入。
-        for key in ['gift', 'five']:
-            story.append(Paragraph(ch8[f'{key}_h2'], styles['h2']))
-            story.append(Paragraph(ch8[f'{key}_body'], styles['body']))
-            story.append(Spacer(1, 3*mm))
+        img8 = chapter_illustration('09_chapter8_calligraphy.png', 35)
+        # 最初のセクション (gift) + イラスト をフロート配置
+        first8 = [
+            Paragraph(ch8['gift_h2'], styles['h2']),
+            Paragraph(ch8['gift_body'], styles['body']),
+        ]
+        if img8:
+            story.append(floating_image_with_text(img8, first8, side='left'))
+        else:
+            for el in first8:
+                story.append(el)
+        story.append(Spacer(1, 3*mm))
+        # five は本文だけ
+        story.append(Paragraph(ch8['five_h2'], styles['h2']))
+        story.append(Paragraph(ch8['five_body'], styles['body']))
+        story.append(Spacer(1, 3*mm))
 
         # 五格テーブル＋具体解説（計算結果は必ず表示する）
         if seimei:
@@ -908,9 +942,19 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     if ch9:
         # サラ専用：深掘り版本文
         story.append(Paragraph("第9章：あなたの言葉が映す本質", styles['h1']))
-        for el in chapter_illustration('10_chapter9_letter.png', 65):
-            story.append(el)
-        for key in ['opening', 'talent', 'value', 'future', 'integration']:
+        img9 = chapter_illustration('10_chapter9_letter.png', 35)
+        # 最初のセクション (opening) + イラスト をフロート配置
+        first9 = [
+            Paragraph(ch9['opening_h2'], styles['h2']),
+            Paragraph(ch9['opening_body'], styles['body']),
+        ]
+        if img9:
+            story.append(floating_image_with_text(img9, first9, side='right'))
+        else:
+            for el in first9:
+                story.append(el)
+        story.append(Spacer(1, 3*mm))
+        for key in ['talent', 'value', 'future', 'integration']:
             story.append(Paragraph(ch9[f'{key}_h2'], styles['h2']))
             story.append(Paragraph(ch9[f'{key}_body'], styles['body']))
             story.append(Spacer(1, 3*mm))
@@ -962,8 +1006,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== Page 10: サラからの手紙 ==============
     story.append(Spacer(1, 8*mm))
     story.append(Paragraph("あなたへ — サラからの手紙", styles['title']))
-    for el in chapter_illustration('11_epilogue_roses.png', 75):
-        story.append(el)
     story.append(Spacer(1, 8*mm))
 
     letter_paragraphs = [
