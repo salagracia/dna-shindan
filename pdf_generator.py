@@ -416,9 +416,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== Page 3: 人生開花タイプ詳細（メイン） ==============
     mbti = result['personality']['mbti']
     story.append(Paragraph(f"第2章：あなたの人生開花タイプ", styles['h1']))
-    for el in chapter_illustration('03_chapter2_bouquet.png', 65):
-        story.append(el)
-    # メインタイプに応じた象徴イラスト
+    # メインタイプに応じた象徴イラスト（花束イラストは削除・サラさん指示）
     kaika_main = result.get('personality', {}).get('jinsei_kaika', {})
     main_code = kaika_main.get('type', 'A')
     type_illust_map = {
@@ -428,7 +426,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         'D': '15_type_D_beauty.png',
     }
     type_illust_fn = type_illust_map.get(main_code, '12_type_A_creation.png')
-    for el in chapter_illustration(type_illust_fn, 55):
+    for el in chapter_illustration(type_illust_fn, 65):
         story.append(el)
 
     # narrative_generatorから本文取得（サラ専用テスト本文／Phase2でAPI生成）
