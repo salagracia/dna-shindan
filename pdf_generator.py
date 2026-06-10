@@ -492,15 +492,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
     # ============== 第4章：人生の追い風とブレーキ ==============
     story.append(Paragraph("第4章：人生の追い風とブレーキ", styles['h1']))
-    for el in chapter_illustration('05_chapter4_sailboat.png', 65):
-        story.append(el)
-    try:
-        from calculations.chart_generator import make_balance_chart
-        chart_path = make_balance_chart()
-        story.append(Image(chart_path, width=120*mm, height=60*mm, hAlign='CENTER'))
-        story.append(Spacer(1, 3*mm))
-    except Exception as e:
-        print(f"[CHART] balance error: {e}")
+    # 帆船イラスト＋天秤チャート両方とも削除（サラさん指示・意味が伝わらない）
 
     from calculations.narrative_generator import get_chapter4_narrative
     ch4 = get_chapter4_narrative(user_data, result)
