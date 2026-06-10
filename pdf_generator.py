@@ -461,12 +461,10 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== Page 4: 隠れ才能タイプ（第2位） ==============
     wd = result['personality']['wd']
     story.append(Paragraph(f"第3章：あなたの隠れ才能タイプ", styles['h1']))
-    for el in chapter_illustration('04_chapter3_bud.png', 65):
-        story.append(el)
-    # 隠れ才能タイプに応じた象徴イラスト
+    # 隠れ才能タイプに応じた象徴イラスト（蕾ヘッダーは削除・サラさん指示）
     second_code = kaika_main.get('second_type', 'D')
     second_illust_fn = type_illust_map.get(second_code, '15_type_D_beauty.png')
-    for el in chapter_illustration(second_illust_fn, 55):
+    for el in chapter_illustration(second_illust_fn, 65):
         story.append(el)
 
     from calculations.narrative_generator import get_chapter3_narrative
