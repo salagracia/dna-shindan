@@ -268,7 +268,7 @@ def build_prologue(user_data: dict, result: dict, styles) -> list:
     elements.append(Spacer(1, 4*mm))
 
     # 読み方ガイド
-    elements.append(Paragraph("📖 このレポートの読み方", styles['h2']))
+    elements.append(Paragraph("このレポートの読み方", styles['h2']))
     guide = (
         "もし最初に読むなら、<br/>"
         "・<b>第1章「あなたの本質」</b><br/>"
@@ -459,7 +459,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph(f"あなたのタイプ：<b>{mbti['type']} — {mbti.get('label', '')}</b>", styles['h2']))
         story.append(Paragraph(mbti.get('summary', ''), styles['quote']))
 
-        story.append(Paragraph("💪 あなたの強み", styles['h3']))
+        story.append(Paragraph("あなたの強み", styles['h3']))
         story.append(bullet_list(mbti.get('strengths', []), styles))
 
         story.append(Paragraph("気をつけたい弱点", styles['h3']))
@@ -468,7 +468,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph("人間関係の特徴", styles['h3']))
         story.append(Paragraph(mbti.get('relationships', ''), styles['body']))
 
-        story.append(Paragraph("💼 適職・キャリア", styles['h3']))
+        story.append(Paragraph("適職・キャリア", styles['h3']))
         story.append(Paragraph(mbti.get('career', ''), styles['body']))
 
         story.append(Paragraph("あなたが取り組むといいチャレンジ", styles['h3']))
@@ -793,7 +793,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
         # 数秘ライフパスの具体解説（計算結果由来の固有情報）
         if lp_deep:
-            story.append(Paragraph(f"📖 ライフパス{n['life_path']['number']}の詳細：{lp_deep.get('title', '')}", styles['h3']))
+            story.append(Paragraph(f"ライフパス{n['life_path']['number']}の詳細：{lp_deep.get('title', '')}", styles['h3']))
             story.append(Paragraph(lp_deep.get('essence', ''), styles['quote']))
             story.append(Spacer(1, 2*mm))
             story.append(Paragraph("あなたの才能", styles['h3']))
