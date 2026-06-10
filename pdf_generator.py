@@ -398,18 +398,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     ]))
     story.append(tbl)
 
-    # 4タイプ レーダーチャート挿入
-    try:
-        from calculations.chart_generator import make_type_radar
-        kaika = result.get('personality', {}).get('jinsei_kaika', {})
-        scores = kaika.get('all_scores', {'A': 6, 'B': 6, 'C': 6, 'D': 6})
-        story.append(Spacer(1, 3*mm))
-        chart_path = make_type_radar(scores)
-        story.append(Image(chart_path, width=95*mm, height=95*mm, hAlign='CENTER'))
-        story.append(Spacer(1, 3*mm))
-    except Exception as e:
-        print(f"[CHART] radar error: {e}")
-
     # 第1章 本文（narrative_generatorから取得・サラ専用テスト本文／Phase2でAPI生成）
     from calculations.narrative_generator import get_chapter1_narrative
     ch1 = get_chapter1_narrative(user_data, result)
