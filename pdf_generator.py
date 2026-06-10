@@ -981,6 +981,8 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
             story.append(Paragraph(ch9[f'{key}_h2'], styles['h2']))
             story.append(Paragraph(ch9[f'{key}_body'], styles['body']))
             story.append(Spacer(1, 3*mm))
+        # 第9章末で改ページ → サラからの手紙を新ページ1枚に
+        story.append(PageBreak())
     elif n1 or n2:
         # フォールバック（旧テンプレ）：簡易版引用＋コメント
         kaika_main = result.get('personality', {}).get('jinsei_kaika', {})
@@ -1027,64 +1029,71 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(PageBreak())
 
     # ============== Page 10: サラからの手紙 ==============
-    story.append(Spacer(1, 8*mm))
-    story.append(Paragraph("あなたへ — サラからの手紙", styles['title']))
-    story.append(Spacer(1, 8*mm))
+    # タイトル小さく
+    story.append(Spacer(1, 4*mm))
+    story.append(Paragraph("あなたへ — サラからの手紙", styles['h1']))
+    story.append(Spacer(1, 2*mm))
 
+    # 手紙冒頭部分をバラのつぼみイラストとフロート配置（左配置）
+    img_letter = chapter_illustration('04_chapter3_bud.png', 32)
+    letter_intro = [
+        Paragraph("このレポートを読み終えたあなたに、伝えたいことがあります。", styles['body']),
+        Spacer(1, 2*mm),
+        Paragraph(
+            "50代を超えた女性は、「もう遅い」と思いがちです。<br/>"
+            "でも、それは社会が植え付けた幻想です。",
+            styles['body']
+        ),
+        Spacer(1, 2*mm),
+        Paragraph(
+            "あなたの星。あなたの命。あなたの名前。<br/>"
+            "すべてが、「<b>これからが本番</b>」と語っています。",
+            styles['body']
+        ),
+    ]
+    if img_letter:
+        story.append(floating_image_with_text(img_letter, letter_intro, side='left'))
+    else:
+        for el in letter_intro:
+            story.append(el)
+    story.append(Spacer(1, 3*mm))
+
+    # 残りの手紙本文（コンパクトに）
     letter_paragraphs = [
-        "このレポートを読み終えたあなたに、伝えたいことがあります。",
-        "",
-        "50代を超えた女性は、「もう遅い」と思いがちです。<br/>"
-        "でも、それは社会が植え付けた幻想です。",
-        "",
-        "あなたの星。<br/>"
-        "あなたの命。<br/>"
-        "あなたの名前。<br/>"
-        "すべてが、「<b>これからが本番</b>」と語っています。",
-        "",
         "老いることは、衰えることではありません。<br/>"
         "<b>深まること。磨かれること。本物になっていくこと</b>。",
         "",
         "これからのあなたは、20代の自分には決して手に入らなかった<br/>"
-        "・<b>ゆるぎない美しさ</b><br/>"
-        "・<b>本物の自由</b><br/>"
-        "・<b>深い愛</b><br/>"
+        "・<b>ゆるぎない美しさ</b>　・<b>本物の自由</b>　・<b>深い愛</b><br/>"
         "を、一年ごとに重ねていく女性です。",
         "",
         "恐れないでください。<br/>"
         "<b>あなたの最も美しい時間は、これから始まります。</b>",
         "",
-        "<br/>でもね。<br/>"
-        "<b>人生は、自分を知っただけでは変わりません。</b>",
+        "でもね。<b>人生は、自分を知っただけでは変わりません。</b>",
         "",
-        "私もたくさん学びました。<br/>"
-        "本も読みました。セミナーにも行きました。<br/>"
-        "でも本当に人生が変わり始めたのは、<br/>"
-        "<b>「毎日の小さな習慣」が変わった時</b>でした。",
+        "私もたくさん学びました。本もセミナーも。<br/>"
+        "でも本当に人生が変わり始めたのは、<b>「毎日の小さな習慣」が変わった時</b>でした。",
         "",
         "だから私は、私自身が14年間続けてきた<br/>"
-        "<b>食・感謝・心・体の整え方</b>を、<br/>"
-        "<b>「人生を生き直す28日間」</b>にまとめました。",
+        "<b>食・感謝・心・体の整え方</b>を、<b>「人生を生き直す28日間」</b>にまとめました。",
         "",
-        "もしあなたが、この診断結果を読んで<br/>"
-        "「もっと自分らしく生きたい」<br/>"
-        "「人生をもう一度輝かせたい」<br/>"
+        "もしあなたが、この診断結果を読んで「もっと自分らしく生きたい」「人生をもう一度輝かせたい」<br/>"
         "そう感じたなら、次の一歩を踏み出してみてください。",
     ]
     for p in letter_paragraphs:
         if p:
             story.append(Paragraph(p, styles['body']))
         else:
-            story.append(Spacer(1, 3*mm))
+            story.append(Spacer(1, 2*mm))
 
-    story.append(Spacer(1, 6*mm))
+    story.append(Spacer(1, 4*mm))
     story.append(Paragraph(
-        "<b>『人生は、何度でも再起動できる』</b><br/><br/>"
-        "その言葉を、今度は知識ではなく、<br/>"
-        "あなた自身の人生で体験してほしいのです。",
+        "<b>『人生は、何度でも再起動できる』</b><br/>"
+        "その言葉を、今度は知識ではなく、あなた自身の人生で体験してほしいのです。",
         styles['quote']
     ))
-    story.append(Spacer(1, 6*mm))
+    story.append(Spacer(1, 3*mm))
     story.append(Paragraph(
         "サラ",
         styles['small']
