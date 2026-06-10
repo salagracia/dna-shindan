@@ -346,15 +346,6 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     # ============== 序章：あなたという奇跡 ==============
     for el in build_prologue(user_data, result, styles):
         story.append(el)
-    # 希少性チャート挿入
-    try:
-        from calculations.chart_generator import make_rarity_chart
-        chart_path = make_rarity_chart()
-        story.append(Spacer(1, 4*mm))
-        story.append(Image(chart_path, width=100*mm, height=67*mm, hAlign='CENTER'))
-        story.append(Spacer(1, 3*mm))
-    except Exception as e:
-        print(f"[CHART] rarity error: {e}")
     story.append(PageBreak())
 
     # ============== 第1章：あなたの本質（占術データ一覧） ==============
