@@ -355,7 +355,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         styles['body']
     )
     if img1:
-        story.append(floating_image_with_text(img1, [intro_text], side='left'))
+        story.append(floating_image_with_text(img1, [intro_text], side='right'))
     else:
         story.append(intro_text)
     story.append(Spacer(1, 5*mm))
@@ -462,16 +462,16 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph("💪 あなたの強み", styles['h3']))
         story.append(bullet_list(mbti.get('strengths', []), styles))
 
-        story.append(Paragraph("⚠️ 気をつけたい弱点", styles['h3']))
+        story.append(Paragraph("気をつけたい弱点", styles['h3']))
         story.append(bullet_list(mbti.get('weaknesses', []), styles))
 
-        story.append(Paragraph("💖 人間関係の特徴", styles['h3']))
+        story.append(Paragraph("人間関係の特徴", styles['h3']))
         story.append(Paragraph(mbti.get('relationships', ''), styles['body']))
 
         story.append(Paragraph("💼 適職・キャリア", styles['h3']))
         story.append(Paragraph(mbti.get('career', ''), styles['body']))
 
-        story.append(Paragraph("🎯 あなたが取り組むといいチャレンジ", styles['h3']))
+        story.append(Paragraph("あなたが取り組むといいチャレンジ", styles['h3']))
         story.append(Paragraph(mbti.get('challenge', ''), styles['tip']))
 
     # ============== Page 4: 隠れ才能タイプ（第2位） ==============
@@ -492,7 +492,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
             Paragraph(ch3['awakening_body'], styles['body']),
         ]
         if img3:
-            story.append(floating_image_with_text(img3, first_section, side='left'))
+            story.append(floating_image_with_text(img3, first_section, side='right'))
         else:
             for el in first_section:
                 story.append(el)
@@ -508,13 +508,13 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph(f"戦略：{wd.get('subtitle', '')}", styles['h3']))
         story.append(Paragraph(wd.get('summary', ''), styles['quote']))
 
-        story.append(Paragraph("💎 あなたの強み", styles['h3']))
+        story.append(Paragraph("あなたの強み", styles['h3']))
         story.append(bullet_list(wd.get('strengths', []), styles))
 
-        story.append(Paragraph("⚠️ 気をつけたい弱点", styles['h3']))
+        story.append(Paragraph("気をつけたい弱点", styles['h3']))
         story.append(bullet_list(wd.get('weaknesses', []), styles))
 
-        story.append(Paragraph("🌸 運気を上げる戦略", styles['h3']))
+        story.append(Paragraph("運気を上げる戦略", styles['h3']))
         story.append(Paragraph(wd.get('fortune_strategy', ''), styles['quote']))
 
     # ============== 第4章：人生の追い風とブレーキ ==============
@@ -534,7 +534,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph("あなたの中で働く2つの力——あなたを前に進ませるものと、立ち止まらせるもの", styles['body']))
         story.append(Spacer(1, 3*mm))
 
-        story.append(Paragraph("📌 占術が示すあなたの才能の核", styles['h2']))
+        story.append(Paragraph("占術が示すあなたの才能の核", styles['h2']))
         talent_text = (
             f"{ws['sun']['name']}の太陽が示す「{ws['sun']['theme']}」、"
             f"そして「{n['life_path']['meaning'].split('。')[0]}」というライフパスが、"
@@ -548,7 +548,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph(talent_text, styles['body']))
         story.append(Spacer(1, 4*mm))
 
-        story.append(Paragraph("🎯 あなたの使命の方向", styles['h2']))
+        story.append(Paragraph("あなたの使命の方向", styles['h2']))
         mission_text = (
             f"{result['teiou']['name']}（帝王学）のあり方が示す通り、"
             f"あなたの使命は<b>「{result['teiou']['meaning']}」</b>という方向にあります。<br/><br/>"
@@ -560,7 +560,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph(mission_text, styles['body']))
         story.append(Spacer(1, 4*mm))
 
-        story.append(Paragraph("⚠️ あなたが気をつけるべき落とし穴", styles['h2']))
+        story.append(Paragraph("あなたが気をつけるべき落とし穴", styles['h2']))
         pitfall_text = (
             f"あなたの最大の強み「{mbti.get('strengths', [''])[0]}」は、"
             f"そのまま最大の弱点「{mbti.get('weaknesses', [''])[0]}」と裏表です。<br/><br/>"
@@ -616,7 +616,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
             story.append(Paragraph(ch5[f'{key}_body'], body_style))
             story.append(Spacer(1, 3*mm))
         # 補足：天中殺の具体的な年（実用情報）
-        story.append(Paragraph("📅 補足：あなたの「立ち止まる時期」の具体的な年", styles['h3']))
+        story.append(Paragraph("補足：あなたの「立ち止まる時期」の具体的な年", styles['h3']))
         period_lines = []
         if prev_p:
             period_lines.append(f"前回：<b>{prev_p[0]}年〜{prev_p[1]}年</b>")
@@ -629,7 +629,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         # フォールバック（旧テンプレ）
         story.append(Paragraph("運勢サイクルを味方に、1年後のあなたを描く", styles['body']))
         story.append(Spacer(1, 3*mm))
-        story.append(Paragraph("🌙 あなたの天中殺", styles['h2']))
+        story.append(Paragraph("あなたの天中殺", styles['h2']))
         tc_text = (
             f"<b>{tc.get('name', '')}</b>（日柱：{tc.get('day_kanshi', '')}）<br/>"
             f"{tc.get('meaning', '')}"
@@ -637,7 +637,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph(tc_text, styles['quote']))
         story.append(Spacer(1, 3*mm))
 
-        story.append(Paragraph("📅 あなたの天中殺の年（具体的時期）", styles['h3']))
+        story.append(Paragraph("あなたの天中殺の年（具体的時期）", styles['h3']))
 
         if prev_p:
             story.append(Paragraph(
@@ -662,11 +662,11 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
         story.append(Spacer(1, 5*mm))
 
-        story.append(Paragraph("🌸 これから3年のキーワード（毎年の運勢）", styles['h2']))
+        story.append(Paragraph("これから3年のキーワード（毎年の運勢）", styles['h2']))
 
         year_data = [['年', '十二支', 'キーワード', '解説', '天中殺']]
         for f in fortune_3y:
-            is_tc = "⚠️天中殺" if f['is_tenchusatsu_year'] else "—"
+            is_tc = "天中殺" if f['is_tenchusatsu_year'] else "—"
             year_data.append([
                 f"{f['target_year']}年",
                 f"{f['now_shi']}年",
@@ -691,7 +691,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(year_tbl)
         story.append(Spacer(1, 4*mm))
 
-        story.append(Paragraph("💡 戦略的ポイント", styles['h3']))
+        story.append(Paragraph("戦略的ポイント", styles['h3']))
         next_year_str = f"{next_p[0]}年" if next_p else "?"
         strategy_text = (
             f"あなたの次の天中殺は<b>{next_year_str}からの2年間</b>です。<br/>"
@@ -703,7 +703,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Spacer(1, 5*mm))
 
         # 第5章の最後に「1年の行動指針」をサブセクションとして統合
-        story.append(Paragraph("🌸 これから1年であなたが取るべき3つのアクション", styles['h2']))
+        story.append(Paragraph("これから1年であなたが取るべき3つのアクション", styles['h2']))
         actions = [
             f"<b>1. 才能を開く</b>：{ws['sun']['name']}の輝きを活かした「{ws['sun']['theme'].split('・')[0]}」の場を1つ作る。",
             f"<b>2. 仲間を結ぶ</b>：{result['shusei']['name']}の力を活かして、信頼できる仲間との対話を月1回以上持つ。",
@@ -714,7 +714,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
             story.append(Spacer(1, 2*mm))
 
         story.append(Spacer(1, 4*mm))
-        story.append(Paragraph("⚠️ 今年避けるべきこと", styles['h2']))
+        story.append(Paragraph("今年避けるべきこと", styles['h2']))
         avoid = [
             f"<b>1. </b>{mbti.get('weaknesses', [''])[0]}に陥らないよう、自分のパターンを観察する。",
             f"<b>2. </b>{wd.get('weaknesses', [''])[0]}は{wd['type']}の典型的な失敗パターン。仲間と補完する。",
@@ -737,7 +737,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
             Paragraph(ch6['seeking_body'], styles['body']),
         ]
         if img6:
-            story.append(floating_image_with_text(img6, first6, side='left'))
+            story.append(floating_image_with_text(img6, first6, side='right'))
         else:
             for el in first6:
                 story.append(el)
@@ -749,7 +749,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     else:
         # フォールバック（旧テンプレ）
         story.append(Spacer(1, 3*mm))
-        story.append(Paragraph("💖 恋愛・パートナーシップ相性", styles['h2']))
+        story.append(Paragraph("恋愛・パートナーシップ相性", styles['h2']))
         love_text = (
             f"<b>{mbti['type']}としての相性：</b><br/>{mbti.get('love_match', '')}<br/><br/>"
             f"<b>{wd['type']}としての相性：</b><br/>{wd.get('love_match', '')}"
@@ -757,7 +757,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph(love_text, styles['quote']))
         story.append(Spacer(1, 4*mm))
 
-        story.append(Paragraph("✨ 相性まとめ", styles['h2']))
+        story.append(Paragraph("相性まとめ", styles['h2']))
         matching_summary = (
             f"あなたは<b>{mbti['type']}×{wd['type']}</b>の組み合わせ。<br/>"
             f"パートナーには、あなたの<b>「{mbti.get('strengths', [''])[0]}」</b>を理解し、"
@@ -796,13 +796,13 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
             story.append(Paragraph(f"📖 ライフパス{n['life_path']['number']}の詳細：{lp_deep.get('title', '')}", styles['h3']))
             story.append(Paragraph(lp_deep.get('essence', ''), styles['quote']))
             story.append(Spacer(1, 2*mm))
-            story.append(Paragraph("💎 あなたの才能", styles['h3']))
+            story.append(Paragraph("あなたの才能", styles['h3']))
             story.append(Paragraph(lp_deep.get('talent', ''), styles['body']))
-            story.append(Paragraph("🌱 成長の余白（伸びしろ）", styles['h3']))
+            story.append(Paragraph("成長の余白（伸びしろ）", styles['h3']))
             story.append(Paragraph(lp_deep.get('growth', ''), styles['body']))
-            story.append(Paragraph("🌟 魂の使命", styles['h3']))
+            story.append(Paragraph("魂の使命", styles['h3']))
             story.append(Paragraph(lp_deep.get('mission', ''), styles['body']))
-            story.append(Paragraph("🌸 50代以上のあなたへ", styles['h3']))
+            story.append(Paragraph("50代以上のあなたへ", styles['h3']))
             story.append(Paragraph(lp_deep.get('for_50s', ''), styles['quote']))
     elif lp_deep:
         story.append(Paragraph(f"第7章：数秘ライフパス {n['life_path']['number']} — あなたの数の物語", styles['h1']))
@@ -810,16 +810,16 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph(lp_deep.get('essence', ''), styles['quote']))
         story.append(Spacer(1, 3*mm))
 
-        story.append(Paragraph("💎 あなたの才能", styles['h3']))
+        story.append(Paragraph("あなたの才能", styles['h3']))
         story.append(Paragraph(lp_deep.get('talent', ''), styles['body']))
 
-        story.append(Paragraph("🌱 成長の余白（伸びしろ）", styles['h3']))
+        story.append(Paragraph("成長の余白（伸びしろ）", styles['h3']))
         story.append(Paragraph(lp_deep.get('growth', ''), styles['body']))
 
-        story.append(Paragraph("🌟 魂の使命", styles['h3']))
+        story.append(Paragraph("魂の使命", styles['h3']))
         story.append(Paragraph(lp_deep.get('mission', ''), styles['body']))
 
-        story.append(Paragraph("🌸 50代以上のあなたへ", styles['h3']))
+        story.append(Paragraph("50代以上のあなたへ", styles['h3']))
         story.append(Paragraph(lp_deep.get('for_50s', ''), styles['quote']))
 
     # ============== 第8章：名前に宿る、あなたへの祝福 ==============
@@ -837,7 +837,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
             Paragraph(ch8['gift_body'], styles['body']),
         ]
         if img8:
-            story.append(floating_image_with_text(img8, first8, side='left'))
+            story.append(floating_image_with_text(img8, first8, side='right'))
         else:
             for el in first8:
                 story.append(el)
@@ -858,7 +858,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
 
         # 五格テーブル＋具体解説（計算結果は必ず表示する）
         if seimei:
-            story.append(Paragraph("📜 あなたの五格（計算結果）", styles['h3']))
+            story.append(Paragraph("あなたの五格（計算結果）", styles['h3']))
             gokaku = seimei.get('gokaku', {})
             gokaku_data = [
                 ['格', '画数', '数霊の名', '役割'],
@@ -887,17 +887,17 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph(ch8['essence_h2'], styles['h2']))
         story.append(Paragraph(ch8['essence_body'], styles['body']))
         if seimei:
-            story.append(Paragraph(f"⭐ あなたの主運：{seimei['jinkaku']['name']}（{seimei['jinkaku']['number']}画）", styles['h3']))
+            story.append(Paragraph(f"あなたの主運：{seimei['jinkaku']['name']}（{seimei['jinkaku']['number']}画）", styles['h3']))
             story.append(Paragraph(seimei['jinkaku']['description'], styles['body']))
         story.append(Spacer(1, 3*mm))
 
         story.append(Paragraph(ch8['totality_h2'], styles['h2']))
         story.append(Paragraph(ch8['totality_body'], styles['body']))
         if seimei:
-            story.append(Paragraph(f"🌸 人生全体の大運：{seimei['soukaku']['name']}（{seimei['soukaku']['number']}画）", styles['h3']))
+            story.append(Paragraph(f"人生全体の大運：{seimei['soukaku']['name']}（{seimei['soukaku']['number']}画）", styles['h3']))
             story.append(Paragraph(seimei['soukaku']['description'], styles['body']))
             sansai = seimei.get('sansai', {})
-            story.append(Paragraph(f"🌳 三才配置：{sansai.get('combo', '')}", styles['h3']))
+            story.append(Paragraph(f"三才配置：{sansai.get('combo', '')}", styles['h3']))
             story.append(Paragraph(sansai.get('meaning', ''), styles['body']))
         story.append(Spacer(1, 3*mm))
 
@@ -915,7 +915,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Spacer(1, 4*mm))
 
         # 五格テーブル
-        story.append(Paragraph("📜 あなたの五格", styles['h2']))
+        story.append(Paragraph("あなたの五格", styles['h2']))
         gokaku = seimei.get('gokaku', {})
         gokaku_data = [
             ['格', '画数', '数霊の名', '役割'],
@@ -941,18 +941,18 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Spacer(1, 4*mm))
 
         # 主運（人格）の詳細解説
-        story.append(Paragraph(f"⭐ あなたの主運：{seimei['jinkaku']['name']}", styles['h3']))
+        story.append(Paragraph(f"あなたの主運：{seimei['jinkaku']['name']}", styles['h3']))
         story.append(Paragraph(seimei['jinkaku']['description'], styles['body']))
         story.append(Spacer(1, 3*mm))
 
         # 総格（人生全体）
-        story.append(Paragraph(f"🌸 人生全体の大運：{seimei['soukaku']['name']}", styles['h3']))
+        story.append(Paragraph(f"人生全体の大運：{seimei['soukaku']['name']}", styles['h3']))
         story.append(Paragraph(seimei['soukaku']['description'], styles['body']))
         story.append(Spacer(1, 3*mm))
 
         # 三才配置
         sansai = seimei.get('sansai', {})
-        story.append(Paragraph(f"🌳 三才配置：{sansai.get('combo', '')}", styles['h3']))
+        story.append(Paragraph(f"三才配置：{sansai.get('combo', '')}", styles['h3']))
         story.append(Paragraph(sansai.get('meaning', ''), styles['body']))
 
     # ============== 第9章：あなたの言葉が映す本質 ==============
@@ -984,7 +984,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     elif n1 or n2:
         # フォールバック（旧テンプレ）：簡易版引用＋コメント
         kaika_main = result.get('personality', {}).get('jinsei_kaika', {})
-        story.append(Paragraph("✍️ 第9章：あなたの言葉が映す本質", styles['h1']))
+        story.append(Paragraph("第9章：あなたの言葉が映す本質", styles['h1']))
         story.append(Spacer(1, 3*mm))
         story.append(Paragraph(
             "あなたが書いてくれた言葉から、内側の輝きを読み解きます。<br/>"
@@ -994,7 +994,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Spacer(1, 4*mm))
 
         if n1:
-            story.append(Paragraph("📝 あなたの夢中体験", styles['h2']))
+            story.append(Paragraph("あなたの夢中体験", styles['h2']))
             story.append(Paragraph(
                 f"<i>「{n1}」</i>",
                 styles['body']
@@ -1010,7 +1010,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
             story.append(Spacer(1, 5*mm))
 
         if n2:
-            story.append(Paragraph("📝 あなたの譲れない信念", styles['h2']))
+            story.append(Paragraph("あなたの譲れない信念", styles['h2']))
             story.append(Paragraph(
                 f"<i>「{n2}」</i>",
                 styles['body']
@@ -1086,7 +1086,7 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     ))
     story.append(Spacer(1, 6*mm))
     story.append(Paragraph(
-        "サラ 🌹",
+        "サラ",
         styles['small']
     ))
 
