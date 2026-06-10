@@ -594,7 +594,21 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         else:
             for el in first5:
                 story.append(el)
-        story.append(Spacer(1, 3*mm))
+        # 整える→広げる→実らせる の波形グラフを文言の直後に配置（低め）
+        try:
+            from calculations.chart_generator import make_three_year_wave
+            from datetime import datetime as _dt
+            cur_year = _dt.now().year
+            chart_path = make_three_year_wave([
+                (f'{cur_year}年', '整える'),
+                (f'{cur_year+1}年', '広げる'),
+                (f'{cur_year+2}年', '実らせる'),
+            ])
+            story.append(Spacer(1, 2*mm))
+            story.append(Image(chart_path, width=150*mm, height=40*mm, hAlign='CENTER'))
+            story.append(Spacer(1, 3*mm))
+        except Exception as e:
+            print(f"[CHART] wave error: {e}")
         for key in ['pause', 'actions', 'release', 'letter']:
             story.append(Paragraph(ch5[f'{key}_h2'], styles['h2']))
             # 「1年後のあなたへ」セクションだけquoteスタイルで温度感UP
@@ -828,10 +842,19 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
             for el in first8:
                 story.append(el)
         story.append(Spacer(1, 3*mm))
-        # five は本文だけ
+        # five セクション本文
         story.append(Paragraph(ch8['five_h2'], styles['h2']))
         story.append(Paragraph(ch8['five_body'], styles['body']))
-        story.append(Spacer(1, 3*mm))
+        story.append(Spacer(1, 2*mm))
+        # 五格ピラミッド（運命名併記版）を本文の直後に
+        try:
+            from calculations.chart_generator import make_seimei_pyramid
+            if seimei:
+                chart_path = make_seimei_pyramid(seimei.get('gokaku', {}))
+                story.append(Image(chart_path, width=150*mm, height=103*mm, hAlign='CENTER'))
+                story.append(Spacer(1, 3*mm))
+        except Exception as e:
+            print(f"[CHART] pyramid error: {e}")
 
         # 五格テーブル＋具体解説（計算結果は必ず表示する）
         if seimei:

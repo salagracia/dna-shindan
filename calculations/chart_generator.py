@@ -117,7 +117,7 @@ def make_three_year_wave(year_keywords: list) -> str:
     if not year_keywords:
         year_keywords = [('今年', '整える'), ('来年', '広げる'), ('再来年', '実らせる')]
 
-    fig, ax = plt.subplots(figsize=(7, 3.5))
+    fig, ax = plt.subplots(figsize=(8, 2.2))
     x = np.linspace(0, 2 * np.pi, 200)
     y = 0.5 + 0.4 * np.sin(x - np.pi / 2)
 
@@ -144,46 +144,67 @@ def make_three_year_wave(year_keywords: list) -> str:
 
 
 # ===== 4. 第8章：五格ピラミッド =====
+def _get_surei_name(num: int) -> str:
+    """SUREI_81から運命の名前だけ取得（chart_generatorで内製・依存最小化）"""
+    try:
+        from calculations.seimei_handan import SUREI_81
+        item = SUREI_81.get(num)
+        if item:
+            return item[0]  # ('名前', '説明') の0番目
+    except Exception:
+        pass
+    return ''
+
+
 def make_seimei_pyramid(gokaku: dict) -> str:
-    """姓名判断の五格を視覚的に表示
+    """姓名判断の五格を視覚的に表示（運命の名前を併記）
     gokaku = {'tenkaku': 11, 'jinkaku': 11, 'chikaku': 5, 'gaikaku': 5, 'soukaku': 16}
     """
-    fig, ax = plt.subplots(figsize=(7, 5))
+    fig, ax = plt.subplots(figsize=(8, 5.5))
     fig.patch.set_facecolor('white')
 
-    # 五格の配置（ピラミッド型）
+    # 五格データ（運命の名前を併記）
     items = [
-        ('天格\n(先祖)', gokaku.get('tenkaku', 0), 0.5, 0.85, BRAND_PURPLE),
-        ('人格\n(本質★)', gokaku.get('jinkaku', 0), 0.5, 0.55, BRAND_RED),
-        ('地格\n(基礎)', gokaku.get('chikaku', 0), 0.5, 0.25, BRAND_PURPLE),
-        ('外格\n(社会)', gokaku.get('gaikaku', 0), 0.15, 0.55, BRAND_GOLD),
-        ('総格\n(全体)', gokaku.get('soukaku', 0), 0.85, 0.55, BRAND_GOLD),
+        ('天格', '先祖から受け継ぐ運', gokaku.get('tenkaku', 0), 0.5, 0.88, BRAND_PURPLE),
+        ('人格', 'あなたの本質 ★', gokaku.get('jinkaku', 0), 0.5, 0.55, BRAND_RED),
+        ('地格', '幼少期の基礎', gokaku.get('chikaku', 0), 0.5, 0.22, BRAND_PURPLE),
+        ('外格', '社会での印象', gokaku.get('gaikaku', 0), 0.12, 0.55, BRAND_GOLD),
+        ('総格', '人生全体', gokaku.get('soukaku', 0), 0.88, 0.55, BRAND_GOLD),
     ]
 
-    for name, num, x, y, color in items:
+    # 接続線（中央軸＋左右）
+    ax.plot([0.5, 0.5, 0.5], [0.88, 0.55, 0.22], color='#CCC',
+            linestyle='--', zorder=1, linewidth=1.2)
+    ax.plot([0.12, 0.5, 0.88], [0.55, 0.55, 0.55], color='#CCC',
+            linestyle='--', zorder=1, linewidth=1.2)
+
+    for label, role, num, x, y, color in items:
         # 円
-        circle = plt.Circle((x, y), 0.09, color=color, alpha=0.85,
-                            zorder=3)
+        circle = plt.Circle((x, y), 0.085, color=color, alpha=0.9, zorder=3)
         ax.add_patch(circle)
         # 数字
         ax.text(x, y, str(num), ha='center', va='center',
                 fontsize=18, fontweight='bold', color='white', zorder=4)
-        # ラベル
-        ax.text(x, y - 0.15, name, ha='center', va='center',
-                fontsize=9, color='#333', fontweight='bold')
+        # 五格名（上）
+        ax.text(x, y + 0.115, label, ha='center', va='center',
+                fontsize=11, color='#333', fontweight='bold')
+        # 役割（円のすぐ下）
+        ax.text(x, y - 0.115, role, ha='center', va='center',
+                fontsize=8, color='#666')
+        # 運命の名前（一番下・縁取りボックス）
+        surei_name = _get_surei_name(num)
+        if surei_name:
+            ax.text(x, y - 0.185, surei_name, ha='center', va='center',
+                    fontsize=8.5, color=color, fontweight='bold',
+                    bbox=dict(boxstyle='round,pad=0.3', facecolor='white',
+                              edgecolor=color, linewidth=1))
 
-    # 線で繋ぐ（天→人→地 が中心軸、外と総は左右）
-    ax.plot([0.5, 0.5, 0.5], [0.85, 0.55, 0.25], color='#999',
-            linestyle='--', zorder=1, linewidth=1.5)
-    ax.plot([0.15, 0.5, 0.85], [0.55, 0.55, 0.55], color='#999',
-            linestyle='--', zorder=1, linewidth=1.5)
-
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0.05, 1)
+    ax.set_xlim(-0.05, 1.05)
+    ax.set_ylim(0, 1)
     ax.set_aspect('equal')
     ax.axis('off')
     ax.set_title('あなたの五格 — 名前に宿る5つの運', fontsize=13,
-                 color=BRAND_PURPLE, fontweight='bold')
+                 color=BRAND_PURPLE, fontweight='bold', pad=10)
     return _save_to_temp_png(fig)
 
 
