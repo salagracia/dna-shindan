@@ -267,21 +267,6 @@ def build_prologue(user_data: dict, result: dict, styles) -> list:
     elements.append(Paragraph(core_message, styles['quote']))
     elements.append(Spacer(1, 4*mm))
 
-    # 読み方ガイド
-    elements.append(Paragraph("このレポートの読み方", styles['h2']))
-    guide = (
-        "もし最初に読むなら、<br/>"
-        "・<b>第1章「あなたの本質」</b><br/>"
-        "・<b>第2章「人生開花タイプ」</b><br/>"
-        "・<b>第4章「人生の追い風とブレーキ」</b><br/>"
-        "から読み進めてください。今の自分を理解するヒントが見つかるはずです。<br/><br/>"
-        "また、迷った時、自信を失った時、人生の転機を迎えた時には、<br/>"
-        "<b>第5章「これからの開花シナリオ」</b>を開いてみてください。<br/>"
-        "そこには、今のあなたが忘れかけている大切な視点が記されています。"
-    )
-    elements.append(Paragraph(guide, styles['body']))
-    elements.append(Spacer(1, 4*mm))
-
     # 結びの一文
     closing = (
         f"{name}さん。<br/><br/>"
