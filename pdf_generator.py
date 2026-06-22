@@ -412,66 +412,105 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
             styles['quote']
         ))
 
-    # ============== Page 3: 人生開花タイプ詳細（メイン） ==============
-    mbti = result['personality']['mbti']
-    story.append(Paragraph(f"第2章：あなたの人生開花タイプ", styles['h1']))
+    # ============== Page 3: 若見え魅力タイプ（メイン） ==============
+    story.append(Paragraph(f"第2章：あなたの若見え魅力タイプ", styles['h1']))
     kaika_main = result.get('personality', {}).get('jinsei_kaika', {})
 
-    # narrative_generatorから本文取得
-    from calculations.narrative_generator import get_chapter2_narrative
-    ch2 = get_chapter2_narrative(user_data, result)
-    if ch2:
-        story.append(Paragraph(f"あなたのタイプ：<b>{mbti['type']} — {mbti.get('label', '')}</b>", styles['h2']))
-        for key in ['talent', 'scene', 'past', 'bloom', 'future']:
-            story.append(Paragraph(ch2[f'{key}_h2'], styles['h2']))
-            story.append(Paragraph(ch2[f'{key}_body'], styles['body']))
-            story.append(Spacer(1, 3*mm))
+    main_type_code = kaika_main.get('type', '')
+    main_type_name = kaika_main.get('name', '')
+    main_aging_name = kaika_main.get('aging_name', '')
+
+    # タイプヘッダー（魅力タイプ名＋老け見えタイプ名 併記）
+    if main_aging_name:
+        type_header = (
+            f"あなたのタイプ：<b>{main_type_code} {main_type_name}</b>"
+            f"　（{main_aging_name}）"
+        )
     else:
-        # フォールバック（旧テンプレ）
-        story.append(Paragraph(f"あなたのタイプ：<b>{mbti['type']} — {mbti.get('label', '')}</b>", styles['h2']))
-        story.append(Paragraph(mbti.get('summary', ''), styles['quote']))
+        type_header = f"あなたのタイプ：<b>{main_type_code} {main_type_name}</b>"
+    story.append(Paragraph(type_header, styles['h2']))
+    story.append(Spacer(1, 3*mm))
 
-        story.append(Paragraph("あなたの強み", styles['h3']))
-        story.append(bullet_list(mbti.get('strengths', []), styles))
+    # 3ブロック構造：本来のあなた / 崩れる条件 / 老け見え現象
+    essence = kaika_main.get('essence', '') or kaika_main.get('body', '')
+    shadow = kaika_main.get('shadow', '')
+    aging_signs = kaika_main.get('aging_signs', '')
 
-        story.append(Paragraph("気をつけたい弱点", styles['h3']))
-        story.append(bullet_list(mbti.get('weaknesses', []), styles))
+    if essence:
+        story.append(Paragraph("【本来のあなた】", styles['h3']))
+        story.append(Paragraph(essence.replace('\n', '<br/>'), styles['body']))
+        story.append(Spacer(1, 4*mm))
 
-        story.append(Paragraph("人間関係の特徴", styles['h3']))
-        story.append(Paragraph(mbti.get('relationships', ''), styles['body']))
+    if shadow:
+        story.append(Paragraph("【崩れる条件】", styles['h3']))
+        story.append(Paragraph(shadow.replace('\n', '<br/>'), styles['body']))
+        story.append(Spacer(1, 4*mm))
 
-        story.append(Paragraph("適職・キャリア", styles['h3']))
-        story.append(Paragraph(mbti.get('career', ''), styles['body']))
+    if aging_signs:
+        story.append(Paragraph("【老け見えとして表れる現象】", styles['h3']))
+        story.append(Paragraph(aging_signs.replace('\n', '<br/>'), styles['body']))
+        story.append(Spacer(1, 4*mm))
 
-        story.append(Paragraph("あなたが取り組むといいチャレンジ", styles['h3']))
-        story.append(Paragraph(mbti.get('challenge', ''), styles['tip']))
+    # 締めメッセージ（次章への橋渡し）
+    story.append(Paragraph(
+        "<i>これは「欠点」ではありません。<br/>"
+        "あなたの中にある本来の魅力が、ただ少し眠っているだけ。<br/>"
+        "次の章で、あなたの中に眠るもう一つの魅力（隠れ才能タイプ）を見ていきます。</i>",
+        styles['quote']
+    ))
 
     # ============== Page 4: 隠れ才能タイプ（第2位） ==============
-    wd = result['personality']['wd']
     story.append(Paragraph(f"第3章：あなたの隠れ才能タイプ", styles['h1']))
 
-    from calculations.narrative_generator import get_chapter3_narrative
-    ch3 = get_chapter3_narrative(user_data, result)
-    if ch3:
-        story.append(Paragraph(f"あなたのタイプ：<b>{wd['type']} — {wd.get('label', '')}</b>", styles['h2']))
-        for key in ['awakening', 'scene', 'overlap', 'practice', 'future']:
-            story.append(Paragraph(ch3[f'{key}_h2'], styles['h2']))
-            story.append(Paragraph(ch3[f'{key}_body'], styles['body']))
-            story.append(Spacer(1, 3*mm))
+    second_type_code = kaika_main.get('second_type', '')
+    second_type_name = kaika_main.get('second_name', '')
+    second_aging_name = kaika_main.get('second_aging_name', '')
+    second_essence = kaika_main.get('second_essence', '') or kaika_main.get('second_body', '')
+    second_shadow = kaika_main.get('second_shadow', '')
+    second_aging_signs = kaika_main.get('second_aging_signs', '')
+
+    story.append(Paragraph(
+        f"メインタイプの<b>「{main_type_name}」</b>は、あなたの表に出ている魅力。<br/>"
+        f"そしてその奥には、もう一つの魅力が眠っています。",
+        styles['body']
+    ))
+    story.append(Spacer(1, 3*mm))
+
+    if second_aging_name:
+        second_header = (
+            f"あなたの隠れ才能：<b>{second_type_code} {second_type_name}</b>"
+            f"　（{second_aging_name}）"
+        )
     else:
-        # フォールバック（旧テンプレ）
-        story.append(Paragraph(f"あなたのタイプ：<b>{wd['type']} — {wd.get('label', '')}</b>", styles['h2']))
-        story.append(Paragraph(f"戦略：{wd.get('subtitle', '')}", styles['h3']))
-        story.append(Paragraph(wd.get('summary', ''), styles['quote']))
+        second_header = f"あなたの隠れ才能：<b>{second_type_code} {second_type_name}</b>"
+    story.append(Paragraph(second_header, styles['h2']))
+    story.append(Spacer(1, 3*mm))
 
-        story.append(Paragraph("あなたの強み", styles['h3']))
-        story.append(bullet_list(wd.get('strengths', []), styles))
+    if second_essence:
+        story.append(Paragraph("【本来のあなた】", styles['h3']))
+        story.append(Paragraph(second_essence.replace('\n', '<br/>'), styles['body']))
+        story.append(Spacer(1, 4*mm))
 
-        story.append(Paragraph("気をつけたい弱点", styles['h3']))
-        story.append(bullet_list(wd.get('weaknesses', []), styles))
+    if second_shadow:
+        story.append(Paragraph("【崩れる条件】", styles['h3']))
+        story.append(Paragraph(second_shadow.replace('\n', '<br/>'), styles['body']))
+        story.append(Spacer(1, 4*mm))
 
-        story.append(Paragraph("運気を上げる戦略", styles['h3']))
-        story.append(Paragraph(wd.get('fortune_strategy', ''), styles['quote']))
+    if second_aging_signs:
+        story.append(Paragraph("【老け見えとして表れる現象】", styles['h3']))
+        story.append(Paragraph(second_aging_signs.replace('\n', '<br/>'), styles['body']))
+        story.append(Spacer(1, 4*mm))
+
+    # 2タイプの相乗効果メッセージ
+    if main_type_name and second_type_name:
+        story.append(Paragraph(
+            f"<i>メインタイプ「<b>{main_type_name}</b>」と、<br/>"
+            f"隠れ才能「<b>{second_type_name}</b>」。<br/><br/>"
+            f"この二つが響き合った時、あなたの魅力は立体的になります。<br/>"
+            f"片方だけを磨くのではなく、両方を整えることで、<br/>"
+            f"<b>本来の若々しさが、内側から自然に立ち上がっていきます。</b></i>",
+            styles['quote']
+        ))
 
     # ============== 第4章：人生の追い風とブレーキ ==============
     story.append(Paragraph("第4章：人生の追い風とブレーキ", styles['h1']))
