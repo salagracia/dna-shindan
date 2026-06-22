@@ -431,10 +431,13 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     story.append(Paragraph(type_header, styles['h2']))
     story.append(Spacer(1, 3*mm))
 
-    # 3ブロック構造：本来のあなた / 崩れる条件 / 老け見え現象
+    # 6ブロック構造：本来 / 崩れる / 老け見え / スイッチ / 整え方 / メッセージ
     essence = kaika_main.get('essence', '') or kaika_main.get('body', '')
     shadow = kaika_main.get('shadow', '')
     aging_signs = kaika_main.get('aging_signs', '')
+    switch = kaika_main.get('switch', '')
+    action = kaika_main.get('action', '')
+    message = kaika_main.get('message', '')
 
     if essence:
         story.append(Paragraph("【本来のあなた】", styles['h3']))
@@ -451,12 +454,27 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
         story.append(Paragraph(aging_signs.replace('\n', '<br/>'), styles['body']))
         story.append(Spacer(1, 4*mm))
 
+    # ここから「解決の方向性」セクション（YCS教育発信フレーム）
+    if switch:
+        story.append(Paragraph("🌹 あなたの若見えスイッチ", styles['h3']))
+        story.append(Paragraph(switch.replace('\n', '<br/>'), styles['quote']))
+        story.append(Spacer(1, 4*mm))
+
+    if action:
+        story.append(Paragraph("✨ 今日からできる整え方", styles['h3']))
+        story.append(Paragraph(action.replace('\n', '<br/>'), styles['body']))
+        story.append(Spacer(1, 4*mm))
+
+    if message:
+        story.append(Paragraph("💌 あなたへの一言メッセージ", styles['h3']))
+        story.append(Paragraph(message.replace('\n', '<br/>'), styles['quote']))
+        story.append(Spacer(1, 4*mm))
+
     # 締めメッセージ（次章への橋渡し）
     story.append(Paragraph(
-        "<i>これは「欠点」ではありません。<br/>"
-        "あなたの中にある本来の魅力が、ただ少し眠っているだけ。<br/>"
-        "次の章で、あなたの中に眠るもう一つの魅力（隠れ才能タイプ）を見ていきます。</i>",
-        styles['quote']
+        "<i>次の章では、あなたの中に眠るもう一つの魅力<br/>"
+        "（隠れ才能タイプ）を見ていきます。</i>",
+        styles['body']
     ))
 
     # ============== Page 4: 隠れ才能タイプ（第2位） ==============
@@ -468,6 +486,9 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     second_essence = kaika_main.get('second_essence', '') or kaika_main.get('second_body', '')
     second_shadow = kaika_main.get('second_shadow', '')
     second_aging_signs = kaika_main.get('second_aging_signs', '')
+    second_switch = kaika_main.get('second_switch', '')
+    second_action = kaika_main.get('second_action', '')
+    second_message = kaika_main.get('second_message', '')
 
     story.append(Paragraph(
         f"メインタイプの<b>「{main_type_name}」</b>は、あなたの表に出ている魅力。<br/>"
@@ -499,6 +520,22 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
     if second_aging_signs:
         story.append(Paragraph("【老け見えとして表れる現象】", styles['h3']))
         story.append(Paragraph(second_aging_signs.replace('\n', '<br/>'), styles['body']))
+        story.append(Spacer(1, 4*mm))
+
+    # 隠れ才能タイプも「解決の方向性」セクションを追加
+    if second_switch:
+        story.append(Paragraph("🌹 もう一つの若見えスイッチ", styles['h3']))
+        story.append(Paragraph(second_switch.replace('\n', '<br/>'), styles['quote']))
+        story.append(Spacer(1, 4*mm))
+
+    if second_action:
+        story.append(Paragraph("✨ 今日からできる整え方（もう一つ）", styles['h3']))
+        story.append(Paragraph(second_action.replace('\n', '<br/>'), styles['body']))
+        story.append(Spacer(1, 4*mm))
+
+    if second_message:
+        story.append(Paragraph("💌 あなたへの一言メッセージ", styles['h3']))
+        story.append(Paragraph(second_message.replace('\n', '<br/>'), styles['quote']))
         story.append(Spacer(1, 4*mm))
 
     # 2タイプの相乗効果メッセージ
