@@ -389,6 +389,10 @@ def render_step_5():
                 pdf_path = tmp.name
             generate_pdf(user_input, result, pdf_path)
 
+            # PDFバイト列をメモリ保持（メールアドレス間違い対策・画面ダウンロード用）
+            with open(pdf_path, 'rb') as _f:
+                pdf_bytes = _f.read()
+
             st.success("✅ 診断完了！レポートPDFをメールでお送りします。")
             st.markdown("---")
 
@@ -432,7 +436,6 @@ def render_step_5():
                     st.markdown(f"**🌙 次の天中殺：{next_p[0]}年〜{next_p[1]}年**")
 
             st.markdown("---")
-            st.markdown(f"### 📧 PDFレポートを **{st.session_state.email}** にお送りします")
 
             with st.spinner("メール送信中... 📨"):
                 user_input['email_to'] = st.session_state.email
@@ -450,25 +453,38 @@ def render_step_5():
                                                user_input['name'],
                                                pdf_path)
                 if email_result['success']:
-                    st.success(f"""
-✅ **{st.session_state.email} にメールを送信しました！**
-
-📬 メールボックスをご確認ください。
-
-⚠️ **届かない場合**：
-- 迷惑メールフォルダもチェックしてください
-- 5分待っても届かない場合は、メールアドレスを確認して再度診断してください
-                    """)
+                    st.success(
+                        f"📧 **PDFレポートを {st.session_state.email} にお送りしました。**\n\n"
+                        f"📬 メールボックスをご確認ください。\n\n"
+                        f"⚠️ 届かない場合は迷惑メールフォルダもチェックしてください。"
+                    )
                     if admin_result and admin_result.get('success'):
                         st.caption(f"📊 管理者通知も送信済み: {admin_result.get('message')}")
                     st.balloons()
                     st.session_state.diagnosis_completed = True
                 else:
                     st.error(f"❌ メール送信に失敗しました\n\n{email_result['message']}")
-                    st.info("メールアドレスを確認して、もう一度お試しください。")
-                    if st.button("← メールアドレスを修正する"):
-                        st.session_state.step = 4
-                        st.rerun()
+                    st.info("メールアドレスをご確認ください。下のボタンからPDFを直接ダウンロードもできます。")
+
+            # ========== PDFダウンロードボタン（メアド入力ミスへの保険） ==========
+            st.markdown("---")
+            st.markdown("### 📥 念のため、この画面からも受け取れます")
+            st.caption("メールアドレスを間違えて入力された場合や、メールがすぐに届かない場合のために、こちらからもPDFレポートをダウンロードできます。")
+
+            safe_name = (user_input['name'] or 'あなた').replace(' ', '_').replace('　', '_')
+            st.download_button(
+                label="📄 診断レポートPDFをこの画面からダウンロード",
+                data=pdf_bytes,
+                file_name=f"若見え魅力タイプ診断_{safe_name}.pdf",
+                mime="application/pdf",
+                key="dl_pdf_btn",
+            )
+
+            if not email_result['success']:
+                st.markdown("")
+                if st.button("← メールアドレスを修正してもう一度送信する", key="btn_retry_email"):
+                    st.session_state.step = 4
+                    st.rerun()
 
             try:
                 os.unlink(pdf_path)
