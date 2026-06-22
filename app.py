@@ -267,7 +267,7 @@ def render_step_3():
 
     st.markdown("")
 
-    filled_count = 0
+    total_chars = 0
     for n in NARRATIVE_QUESTIONS:
         st.markdown(f"**{n['question']}** _（任意）_")
         st.caption(f"💡 ヒント：{n['hint']}")
@@ -279,26 +279,25 @@ def render_step_3():
             label_visibility="collapsed",
             height=150,
             max_chars=n['max_length'],
-            placeholder="（書ける範囲で。50字以上書くと、診断が深くなります）"
+            placeholder="（書ける範囲で。書いていただくほど診断が深くなります）"
         )
         st.session_state.narrative_answers[n['id']] = ans
         char_count = len((ans or '').strip())
+        total_chars += char_count
         if char_count == 0:
-            st.caption("📝 空欄でも次に進めます。書いていただくと診断が深くなります。")
+            st.caption("📝 空欄のままでも次へ進めます。書いていただくと診断が深くなります。")
         elif char_count < 50:
-            st.caption(f"📝 現在 **{char_count}字** / あと {50 - char_count}字書くと診断が深くなります")
+            st.caption(f"📝 現在 **{char_count}字** — そのまま次へ進めます。書き足すとさらに診断が深くなります")
         elif char_count < 200:
             st.caption(f"✅ 現在 **{char_count}字** — 十分です。200字を目安にするとさらに深くなります")
-            filled_count += 1
         else:
             st.caption(f"✨ 現在 **{char_count}字** — 深い診断に十分な分量です")
-            filled_count += 1
         st.markdown("")
 
-    # 何も書いていない時のさりげない後押し（押し付けすぎない）
-    if filled_count == 0:
+    # 何も書いていない時だけ、後押しメッセージ
+    if total_chars == 0:
         st.info("💡 **時間がない方は空欄のままで大丈夫**です。「次へ」を押せば診断結果に進みます。\n\n"
-                "ただ、ここを少しでも書いていただけると、診断結果のあなたへのメッセージが、ぐっと立体的になります。")
+                "ここを少しでも書いていただけると、診断結果のあなたへのメッセージが、ぐっと立体的になります。")
 
     col_back, col_next = st.columns(2)
     with col_back:
@@ -307,9 +306,8 @@ def render_step_3():
             st.session_state.step = 2
             st.rerun()
     with col_next:
-        # 任意化：常に次へ進める
-        btn_label = "次へ →" if filled_count > 0 else "空欄のまま次へ →"
-        if st.button(btn_label, key="btn_to_step4"):
+        # 任意化：常に「次へ」進める。ボタン文言も「次へ →」に統一して紛らわしさを排除
+        if st.button("次へ →", key="btn_to_step4"):
             st.session_state.step = 4
             st.rerun()
 
