@@ -18,7 +18,7 @@ from email_sender import send_pdf_email, send_admin_notification
 
 
 st.set_page_config(
-    page_title="人生開花タイプ診断 - サラグラシアアカデミー",
+    page_title="若見え魅力タイプ診断 - サラグラシアアカデミー",
     page_icon="🌹",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -37,20 +37,30 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-st.markdown('<h1 class="main-header">🌹 人生開花タイプ診断</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">人生再起動のための、あなた専用の設計図<br>監修：山岡サラ（サラグラシアアカデミー）</p>',
+st.markdown('<h1 class="main-header">🌹 若見え魅力タイプ診断</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">老けて見える本当の理由と、あなた本来の輝き方がわかる<br>監修：山岡サラ（サラグラシアアカデミー）</p>',
             unsafe_allow_html=True)
 
 st.markdown("""
-この**人生開花タイプ診断**は、東洋・西洋の占術と現代心理学を統合して、
-**あなたという唯一無二の存在**を立体的に描き出します。
+最近、写真や鏡を見て
+「私、こんなに疲れて見えていた？」
+と思ったことはありませんか？
 
-🔮 **占術**：数秘・西洋占星術・九星気学・四柱推命・動物キャラ・算命学・帝王学・姓名判断
-🌸 **独自診断**：**サラグラシア独自の人生開花タイプ診断**（24問・4タイプ・メイン+隠れ才能）
-🌙 **運勢**：天中殺・3年間のキーワード
-✍️ **自由記述**：夢中体験・譲れない信念（あなたの言葉が、診断の深さを決めます）
+老け見えの原因は、シワやたるみだけではありません。
 
-**所要時間：約10〜13分**　→ **11ページの個人設計図PDF**をメールでお届け
+自分を後回しにすること。
+人の期待に応えすぎること。
+心が満たされないまま、頑張り続けること。
+
+そうした内側の状態が、知らないうちに表情や雰囲気に表れることがあります。
+
+この診断では、あなたの**生年月日・お名前・心理傾向**から、
+あなたが本来持っている**魅力**と、もう一度**若々しい印象**を取り戻すための整え方を読み解きます。
+
+無理な若作りではなく、
+今のあなたのまま、もう一度きれいに咲くための診断です。
+
+**所要時間：約10〜13分**　→ **個人設計図PDF**をメールでお届け
 """)
 
 st.divider()
@@ -87,11 +97,11 @@ birth_place = st.text_input("出生地（都道府県＋市町村）",
                               placeholder="例：東京都新宿区 / 大阪府大阪市")
 
 
-# ========== Step 2: 人生開花タイプ診断（24問・4択A/B/C/D） ==========
+# ========== Step 2: 若見え魅力タイプ診断（24問・4択A/B/C/D） ==========
 st.divider()
-st.subheader("🌸 Step 2：人生開花タイプ診断（24問）")
+st.subheader("🌸 Step 2：心の傾向チェック（24問）")
 st.caption("「最も近いもの」を1つ選んでください。所要時間 約5分。")
-st.info("💡 サラグラシア独自の高精度診断。**メインタイプ + 隠れ才能タイプ**が判定されます。")
+st.info("💡 サラグラシア独自の高精度診断。**あなたの魅力タイプ + 隠れた輝きタイプ**が見えてきます。")
 
 all_answers = {}
 
@@ -169,7 +179,7 @@ if not input_valid:
                    "💡 **入力済みなのにこの警告が出ている場合**：テキストボックスの外を一度クリックしてください。"
                    "Streamlitの仕様で、ボックスからフォーカスが外れて初めて文字数が反映されます。")
 
-if st.button("✨ あなたの人生開花タイプを診断する ✨", disabled=not input_valid):
+if st.button("✨ あなたの若見え魅力タイプを診断する ✨", disabled=not input_valid):
     with st.spinner("あなたの占術データと性格を計算中... 🔮"):
         user_input = {
             "name": f"{last_name} {first_name}",
@@ -266,10 +276,10 @@ if st.button("✨ あなたの人生開花タイプを診断する ✨", disable
 
 st.divider()
 # ビルドバージョン（デプロイ反映確認用）
-BUILD_VERSION = "v5.0 / 2026-05-31 deploy d5402a3"
+BUILD_VERSION = "v5.1 / 2026-06-22 rebrand-young"
 st.markdown(f"""
 <div style='text-align:center; color:#888; font-size:0.85em; margin-top:30px;'>
-    人生開花タイプ診断 v5.0<br>
+    若見え魅力タイプ診断 v5.1<br>
     監修：山岡サラ（サラグラシアアカデミー）<br>
     『人生は、何度でも再起動できる』<br>
     <span style='color:#bbb; font-size:0.8em;'>Build: {BUILD_VERSION}</span>
