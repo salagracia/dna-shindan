@@ -673,34 +673,19 @@ _GENERIC_BUILDERS = {
 
 
 def is_sara(user_data: dict) -> bool:
-    """ユーザーがサラさん本人かを判定（テスト用本文の出し分け・表記揺れに広く対応）
-    判定条件（いずれかを満たせばサラ本人と判定）:
-      1. カタカナ「ヤマオカサラ」（半角・全角スペース・中点を除去後）
-      2. ひらがな「やまおかさら」
-      3. 漢字フル「山岡サラ」or「山岡 サラ」
-      4. 姓「山岡」+ 生年月日「1963-07-31」+ 出生地に「長崎」を含む
-         （表記揺れがあっても本人を取りこぼさないための最後の砦）
+    """【2026-06-22 無効化】
+
+    旧仕様では、サラさん本人で診断するとSARA_CHAPTER_*固定文が返されていた。
+    その結果、サラさんが回答を変えても第1・4〜9章の本文が変わらず、
+    『以前と同じ結果が出る』というバグになっていた。
+
+    本番運用では全ユーザーが同じ動的生成ルートを通るべきなので、
+    この関数は常にFalseを返すように変更（SARA_CHAPTER_*定数はコード上に
+    残しているが、もう参照されない）。
+
+    将来「サラさん本人だけ特別な序章を出したい」場合は、
+    is_sara_for_letter() のような専用関数を別途定義すること。
     """
-    # 正規化（全角/半角スペース、中点、ハイフン、ドットを除去）
-    def _normalize(s: str) -> str:
-        for ch in (' ', '　', '・', '-', '.', '〜', '~'):
-            s = s.replace(ch, '')
-        return s.strip()
-
-    kana = _normalize(user_data.get('name_kana') or '')
-    name = _normalize(user_data.get('name') or '')
-    last_name = (user_data.get('last_name') or '').strip()
-    birth_date = user_data.get('birth_date', '')
-    birth_place = user_data.get('birth_place', '')
-
-    # パターン1-3: 名前ベースの判定（表記揺れ対応済み）
-    if kana in ('ヤマオカサラ', 'やまおかさら'):
-        return True
-    if name in ('山岡サラ', '山岡さら'):
-        return True
-    # パターン4: コンボ判定（姓＋生年月日＋出生地）
-    if last_name == '山岡' and birth_date == '1963-07-31' and '長崎' in birth_place:
-        return True
     return False
 
 
