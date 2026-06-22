@@ -227,21 +227,43 @@ def render_step_2():
                 st.rerun()
 
 
-# ========== Step 3: 自由記述（2問） ==========
+# ========== Step 3: 自由記述（2問・任意） ==========
 def render_step_3():
     render_header()
 
     st.progress(1.0)
     st.caption("📊 質問は完了しました")
 
-    st.subheader("✍️ あと2問だけ、あなたの言葉で")
-    st.caption("ここを書いていただくと、診断の深さが大きく変わります。50字以上でお願いします。")
-    st.info("💡 この2問の回答から、あなたの **才能の指紋・落とし穴・価値観のコンパス** が浮かび上がります。\n\n"
-            "⚠️ **入力後、テキストボックスの外を一度クリックすると文字数が反映されます**")
+    st.subheader("✍️ もう少しだけ、あなたの言葉を聞かせてください")
 
-    all_narrative_filled = True
+    st.markdown("""
+ここからは **任意** です。
+空欄のままでも診断は完成します。
+
+ただ——
+
+占術データだけだと、診断は「**あなたタイプの一般的な傾向**」で止まってしまいます。
+
+ここに**あなた自身の言葉**が加わると、診断は
+「**あなただけの個人設計図**」に変わります。
+
+特に、次の3つが鮮明になります：
+
+🌸 **あなたの才能の指紋** — 占術では見えない、あなただけの輝き方
+🌸 **あなたの落とし穴** — 同じパターンで繰り返してしまう癖
+🌸 **あなたの価値観のコンパス** — 人生で本当に大切にしたいもの
+
+書ける範囲で大丈夫です。
+**書いていただくほど、診断は深く、あなただけのものになります。**
+""")
+
+    st.caption("⚠️ 入力後、テキストボックスの外を一度クリックすると文字数が反映されます（Streamlitの仕様）")
+
+    st.markdown("")
+
+    filled_count = 0
     for n in NARRATIVE_QUESTIONS:
-        st.markdown(f"**{n['question']}**")
+        st.markdown(f"**{n['question']}** _（任意）_")
         st.caption(f"💡 ヒント：{n['hint']}")
         current_val = st.session_state.narrative_answers.get(n['id'], '')
         ans = st.text_area(
@@ -251,21 +273,26 @@ def render_step_3():
             label_visibility="collapsed",
             height=150,
             max_chars=n['max_length'],
-            placeholder="（50字以上、できれば200字を目安に具体的に）"
+            placeholder="（書ける範囲で。50字以上書くと、診断が深くなります）"
         )
         st.session_state.narrative_answers[n['id']] = ans
         char_count = len((ans or '').strip())
         if char_count == 0:
-            st.caption("📝 入力後、ボックス外をクリックすると文字数が反映されます")
-            all_narrative_filled = False
+            st.caption("📝 空欄でも次に進めます。書いていただくと診断が深くなります。")
         elif char_count < 50:
-            st.caption(f"📝 現在 **{char_count}字** / 最低50字必要")
-            all_narrative_filled = False
+            st.caption(f"📝 現在 **{char_count}字** / あと {50 - char_count}字書くと診断が深くなります")
         elif char_count < 200:
-            st.caption(f"📝 現在 **{char_count}字** / 200字を目安にするとさらに深い診断になります")
+            st.caption(f"✅ 現在 **{char_count}字** — 十分です。200字を目安にするとさらに深くなります")
+            filled_count += 1
         else:
-            st.caption(f"✅ 現在 **{char_count}字** — 十分な分量です")
+            st.caption(f"✨ 現在 **{char_count}字** — 深い診断に十分な分量です")
+            filled_count += 1
         st.markdown("")
+
+    # 何も書いていない時のさりげない後押し（押し付けすぎない）
+    if filled_count == 0:
+        st.info("💡 **時間がない方は空欄のままで大丈夫**です。「次へ」を押せば診断結果に進みます。\n\n"
+                "ただ、ここを少しでも書いていただけると、診断結果のあなたへのメッセージが、ぐっと立体的になります。")
 
     col_back, col_next = st.columns(2)
     with col_back:
@@ -274,7 +301,9 @@ def render_step_3():
             st.session_state.step = 2
             st.rerun()
     with col_next:
-        if st.button("次へ →", disabled=not all_narrative_filled, key="btn_to_step4"):
+        # 任意化：常に次へ進める
+        btn_label = "次へ →" if filled_count > 0 else "空欄のまま次へ →"
+        if st.button(btn_label, key="btn_to_step4"):
             st.session_state.step = 4
             st.rerun()
 
