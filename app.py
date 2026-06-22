@@ -57,7 +57,7 @@ def init_session_state():
         'name_kana': '',
         'birth_date': date(1970, 1, 1),
         'birth_time': time(12, 0),
-        'birth_time_unknown': True,
+        'birth_time_unknown': False,
         'birth_place': '',
         'email': '',
         'diagnosis_completed': False,
@@ -104,7 +104,11 @@ def render_step_1():
 """)
 
     st.divider()
-    st.subheader("👤 まずは、あなたのことを少しだけ")
+    st.subheader("👤 まずは、あなたについて")
+
+    st.info("💡 **ニックネームでも診断できます。**\n\n"
+            "ただし、本名（漢字）でご記入いただくと、**姓名判断**による五格（天格・人格・地格・外格・総格）の診断が追加されます。\n\n"
+            "姓名判断は、お名前に宿る五つの運（先見の明・頭脳明敏・頭領運など）を読み解く伝統的な智慧です。")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -127,15 +131,17 @@ def render_step_1():
     st.markdown("##### 🌙 ここから先は任意項目です")
     st.caption("分かれば、より精密な**西洋占星術の診断**が追加されます。空欄のままでも診断可能です。")
 
-    col3, col4 = st.columns([1, 2])
-    with col3:
-        birth_time_unknown = st.checkbox("時間は分からない", value=st.session_state.birth_time_unknown)
-    with col4:
-        if not birth_time_unknown:
-            birth_time_input = st.time_input("出生時間（任意）", value=st.session_state.birth_time)
-        else:
-            birth_time_input = time(12, 0)
-            st.caption("（12:00で計算します）")
+    birth_time_input = st.time_input(
+        "出生時間（任意）",
+        value=st.session_state.birth_time,
+        help="分からない場合は下のチェックボックスにチェックを入れてください"
+    )
+    birth_time_unknown = st.checkbox(
+        "出生時間は分からない（12:00で計算します）",
+        value=st.session_state.birth_time_unknown
+    )
+    if birth_time_unknown:
+        birth_time_input = time(12, 0)
 
     birth_place = st.text_input("出生地（任意・都道府県＋市町村）",
                                  value=st.session_state.birth_place,
