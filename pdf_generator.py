@@ -189,9 +189,14 @@ def build_prologue(user_data: dict, result: dict, styles) -> list:
     asc = ws.get('asc', {}).get('name', '—')
     kaika = result.get('personality', {}).get('jinsei_kaika', {})
     main_type = kaika.get('name', '—')
+    main_aging = kaika.get('aging_name', '')
     main_tag = kaika.get('tagline', '')
     second_type = kaika.get('second_name', '—')
+    second_aging = kaika.get('second_aging_name', '')
     second_tag = kaika.get('second_tagline', '')
+    # 表示用ラベル（魅力タイプ＋老け見えタイプの併記）
+    main_label = f"{main_type}（{main_aging}）" if main_aging else main_type
+    second_label = f"{second_type}（{second_aging}）" if second_aging else second_type
 
     elements.append(Paragraph("序章　あなたという奇跡", styles['h1']))
 
@@ -362,8 +367,18 @@ def generate_pdf(user_data: dict, result: dict, output_path: str):
          result['doubutsu']['meaning']],
         ['算命学（主星）', result['shusei']['name'], result['shusei']['meaning'][:30]],
         ['帝王学', result['teiou']['name'], result['teiou']['meaning'][:30]],
-        ['人生開花タイプ（メイン）', result['personality']['jinsei_kaika']['type'], result['personality']['jinsei_kaika'].get('name', '')],
-        ['隠れ才能タイプ', result['personality']['jinsei_kaika'].get('second_type', ''), result['personality']['jinsei_kaika'].get('second_name', '')],
+        ['若見え魅力タイプ（メイン）',
+         result['personality']['jinsei_kaika']['type'],
+         (f"{result['personality']['jinsei_kaika'].get('name', '')}"
+          f"（{result['personality']['jinsei_kaika'].get('aging_name', '')}）"
+          if result['personality']['jinsei_kaika'].get('aging_name')
+          else result['personality']['jinsei_kaika'].get('name', ''))],
+        ['隠れ魅力タイプ',
+         result['personality']['jinsei_kaika'].get('second_type', ''),
+         (f"{result['personality']['jinsei_kaika'].get('second_name', '')}"
+          f"（{result['personality']['jinsei_kaika'].get('second_aging_name', '')}）"
+          if result['personality']['jinsei_kaika'].get('second_aging_name')
+          else result['personality']['jinsei_kaika'].get('second_name', ''))],
     ]
 
     tbl = Table(occult_data, colWidths=[38*mm, 55*mm, 77*mm])

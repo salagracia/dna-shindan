@@ -385,7 +385,24 @@ def render_step_5():
 
             st.success("✅ 診断完了！レポートPDFをメールでお送りします。")
             st.markdown("---")
-            st.markdown("### 🔮 あなたの主要結果")
+
+            # 若見え魅力タイプ（最も目立たせる）
+            kaika = result.get('personality', {}).get('jinsei_kaika', {})
+            if kaika.get('name'):
+                st.markdown(f"### 🌹 あなたの若見え魅力タイプ")
+                st.markdown(
+                    f"#### **{kaika['name']}**　（{kaika.get('aging_name', '')}）"
+                )
+                if kaika.get('essence'):
+                    st.markdown(f"_{kaika['essence']}_")
+                if kaika.get('second_name'):
+                    st.caption(
+                        f"🌸 隠れ才能タイプ：**{kaika['second_name']}**"
+                        f"（{kaika.get('second_aging_name', '')}）"
+                    )
+                st.markdown("---")
+
+            st.markdown("### 🔮 あなたの占術データ")
 
             mbti = result['personality']['mbti']
             wd = result['personality']['wd']
